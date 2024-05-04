@@ -1,0 +1,42 @@
+
+   /* SDL_Event event;
+    int x, y;
+    
+    SDL_Texture* targetterTexture = graphics.loadTexture("img//mouse.png");
+    SDL_Texture* bullet = graphics.loadTexture("img//bullet.png");
+    int i = 0;
+    int yb=1;
+    int xb = 1;
+    bool bs = false;
+    while (true) {
+        SDL_PollEvent(&event);
+        SDL_GetMouseState(&x, &y);
+        cerr << x << ", " << y << endl;
+        graphics.renderTexture(targetterTexture, x, y);
+        if (bs)
+        {
+            graphics.renderTexture(bullet, xb, yb-i);
+            i+=5;
+        }
+        graphics.presentScene();
+        SDL_RenderClear(graphics.renderer);
+        switch (event.type) {
+        case SDL_MOUSEBUTTONDOWN:
+            bs = true;
+            yb = y;
+            xb = x;
+            break;
+        case SDL_MOUSEBUTTONUP:
+            break;
+        case SDL_QUIT:
+            exit(0);
+            break;
+        }
+        SDL_Delay(10);
+        if (yb - i <= 0)
+        {
+            bs = false;
+            i = 0;
+        }
+    }
+    */
