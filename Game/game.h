@@ -10,7 +10,9 @@
 #include <SDL_image.h>
 #include <iostream>
 #include <vector>
-
+#include <cstdlib> // For rand() and srand()
+#include <ctime>
+using namespace std;
 bool inside(int x, int y, SDL_Rect r) {
     return x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h;
 }
@@ -25,6 +27,29 @@ struct point
     int y;
 };
 const char* KEYIMAGE = "img//key.png";
+struct fire
+{
+
+    int x;
+    int y;
+    int rx;
+    int ry;
+    void generatefirelocation()
+    {
+        int randx = rand() % 11;
+            int randy = rand() % 5;
+            while (randx == 5 || randy == 3)
+            {
+                randx = rand() % 11;
+                randy = rand() % 7;
+            }
+        x = 65 + 61 * randx;
+        y = 68 + 67 * randy;
+        rx = 77+52 * randx;
+        ry = 70 + 54 * randy;
+    }//65  58 //
+
+};
 struct Key
 {
     int x, y;
@@ -35,7 +60,7 @@ struct Key
 };
 struct En {
     SDL_Rect rect;
-    
+    bool canhurt = 1;
     double x, y;
     bool isfacingright = 0;
     bool isfacingleft = 0;
@@ -164,7 +189,17 @@ struct Cha {
         rect.y = 66;
         rect.w = 62;
         rect.h = 67;
+      
      
+    }
+    void newmap()
+    {
+        rect.x = 299;
+        rect.y = 45;
+        rect.w = 45;
+    rect.h = 45;
+    recspeedx = 49 / 7;
+    recspeedy = 56 / 7;
     }
     void move() {
         x += dx;
@@ -174,7 +209,6 @@ struct Cha {
     }
     bool touchacid()
     {
-        cout << rect.x <<" " << rect.y << endl;
         if (inside(214, 173, rect))
         {
             return true;
@@ -342,6 +376,21 @@ struct Cha {
         
         return  inside(monster.x, monster.y, sr);
 
+    }
+    bool isburnt(vector <fire> vecfire,int firestate)
+    {
+        bool burnt = 0;
+        if (firestate == 1)
+        {
+            for (size_t i = 0;i < vecfire.size();i++)
+            {
+                if (inside(vecfire[i].rx, vecfire[i].ry, rect))
+                {
+                    burnt = true;
+                }
+            }
+        }
+        return burnt;
     }
 
 };

@@ -8,6 +8,8 @@
 #include <SDL_image.h>
 #include "defs.h"
 #include <vector>
+#include "game.h"
+#define FIRELIMIT 30;
 using namespace std;
 void renderTexture(SDL_Texture* texture, int x, int y,
     SDL_Renderer* renderer)
@@ -180,6 +182,34 @@ struct Graphics {
                 "Could not load music! SDL_mixer Error: %s", Mix_GetError());
         }
         return gMusic;
+    }
+    void renderfire(int firestate, Graphics graphics, vector<fire> &vecfire, SDL_Texture* warning, SDL_Texture* burning, int flimit)
+    {
+        switch (firestate)
+        {
+        case 0:
+            flimit = rand() % FIRELIMIT + 1;
+            for (int i = 0;i < flimit; i++)
+            {
+                fire newfire;
+                newfire.generatefirelocation();
+                vecfire[i] = newfire;
+            }
+            break;
+        case 1:
+            for (int i = 0;i < flimit;i++)
+            {
+                graphics.renderTexture(warning, vecfire[i].x, vecfire[i].y);
+            }
+            break;
+        case 2:
+
+            for (int i = 0;i < flimit;i++)
+            {
+                graphics.renderTexture(burning, vecfire[i].x, vecfire[i].y);
+            }
+            break;
+        }
     }
     void play(Mix_Music* gMusic)
     {

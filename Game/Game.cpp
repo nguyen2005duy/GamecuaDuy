@@ -11,7 +11,7 @@
 #include <cstdlib> // For rand() and srand()
 #include <ctime>   // For time()
 #include "chaanimation.h"
-
+#define FIRELIMIT 30;
 using namespace std;
 
 void logErrorAndExit(const char* msg, const char* error)
@@ -67,7 +67,7 @@ void waitUntilKeyPressed()
         if (SDL_PollEvent(&e) != 0 &&
             (e.type == SDL_KEYDOWN || e.type == SDL_QUIT))
             return;
-        SDL_Delay(60);
+        SDL_Delay(50);
     }
 }
 
@@ -75,19 +75,20 @@ void waitUntilKeyPressed()
 int main(int argc, char* argv[])
 {
     srand(time(NULL));
-  
     Graphics graphics;
     graphics.init();
     SDL_Texture* background = loadTexture("img//map1.png", graphics.renderer);
     SDL_Texture* heart = loadTexture("img/heart.png", graphics.renderer);
     SDL_Texture* heartless = loadTexture("img/heartless.png", graphics.renderer);
+    SDL_Texture* burning = loadTexture("img//Fire.png",graphics.renderer);
     SDL_Texture* keyimg = loadTexture(KEYIMAGE,graphics.renderer);
+    SDL_Texture* warning = loadTexture("img\\Warning.png", graphics.renderer);
     Key key;
     key.x = 370;
     key.y = 280;
     key.locx= 408;
     key.locy = 308;
-   
+    int firestate = 0;
     //375//277
     Sprite idle;
     SDL_Texture* chatexture = graphics.loadTexture(CHARACTERFILE);
@@ -138,10 +139,10 @@ int main(int argc, char* argv[])
     bool isfacingright = 0;
     bool isfacingleft = 0;
     Cha cha(65, 50);
+    vector<fire> vecfire(30);
 
     //cha.x = SCREEN_WIDTH / 2;
    // cha.y = SCREEN_HEIGHT / 2;
-    cout << rand();
     int enx = 65 + (rand() % 10 + 1) * INITIAL_SPEEDX * 7;
     int eny = 70 + (rand() % 5 + 1) * INITIAL_SPEEDY * 7;
     bool changedmap = 0;
@@ -159,6 +160,7 @@ int main(int argc, char* argv[])
     int m = 1;
     int currentmap = 0;
     SDL_Event event;
+    int flimit = rand() % FIRELIMIT + 1;
    /* Mix_Music* nc = graphics.loadMusic("audio\\nightdancer.mp3");
     Mix_Music* rn = graphics.loadMusic("audio\\renai.mp3");
     graphics.play(rn);*/
@@ -187,6 +189,7 @@ int main(int argc, char* argv[])
                     changedmap = 0;
                     key.obtained = 0;
                     SDL_DestroyTexture(background);
+                    cha.newmap();
                     background = loadTexture("img//map2.png", graphics.renderer);
                     break;
                 }
@@ -319,7 +322,7 @@ int main(int argc, char* argv[])
                         }
                         graphics.presentScene();
                         
-                        SDL_Delay(60);
+                        SDL_Delay(50);
 
 
 
@@ -350,6 +353,7 @@ int main(int argc, char* argv[])
                 {
                     if (isfacingright)
                     {
+
                         if (slime1.isalive || slime2.isalive || slime3.isalive)
                         {
                             if (cha.slashthrough(slime1.rect, isfacingright, isfacingup, isfacingleft, isfacingdown))
@@ -364,6 +368,18 @@ int main(int argc, char* argv[])
                             {
                                 slime3.heartamount--;
                             }
+                        }
+                        if (slime1.heartamount <= 0 && slime1.isalive)
+                        {
+                            slime1.canhurt = 0;
+                        }
+                        if (slime2.heartamount <= 0 && slime2.isalive)
+                        {
+                            slime2.canhurt = 0;
+                        }
+                        if (slime3.heartamount <= 0 && slime3.isalive)
+                        {
+                            slime3.canhurt = 0;
                         }
                         for (int i = 1;i <= 7;i++)
                         {
@@ -456,10 +472,10 @@ int main(int argc, char* argv[])
                             }
                             graphics.presentScene();
                             
-                            SDL_Delay(60);
+                            SDL_Delay(50);
 
                         }
-                        if (cha.touchacid() || cha.ishurt(slime1.rect) && slime1.isalive || cha.ishurt(slime2.rect) && slime2.isalive || cha.ishurt(slime3.rect) && slime3.isalive)
+                        if (cha.touchacid() || cha.ishurt(slime1.rect) && slime1.canhurt || cha.ishurt(slime2.rect) && slime2.canhurt || cha.ishurt(slime3.rect) && slime3.canhurt)
                         {
                             cha.heartamount--;
                         }
@@ -480,6 +496,18 @@ int main(int argc, char* argv[])
                             {
                                 slime3.heartamount--;
                             }
+                        }
+                        if (slime1.heartamount <= 0 && slime1.isalive)
+                        {
+                            slime1.canhurt = 0;
+                        }
+                        if (slime2.heartamount <= 0 && slime2.isalive)
+                        {
+                            slime2.canhurt = 0;
+                        }
+                        if (slime3.heartamount <= 0 && slime3.isalive)
+                        {
+                            slime3.canhurt = 0;
                         }
                         for (int i = 1;i <= 7;i++)
                         {
@@ -577,9 +605,9 @@ int main(int argc, char* argv[])
                              if(i<=4) slashleft.tick();
                             graphics.presentScene();
                             
-                            SDL_Delay(60);
+                            SDL_Delay(50);
                         }
-                        if (cha.touchacid() || cha.ishurt(slime1.rect) && slime1.isalive || cha.ishurt(slime2.rect) && slime2.isalive || cha.ishurt(slime3.rect) && slime3.isalive)
+                        if (cha.touchacid() || cha.ishurt(slime1.rect) && slime1.canhurt || cha.ishurt(slime2.rect) && slime2.canhurt || cha.ishurt(slime3.rect) && slime3.canhurt)
                         {
                             cha.heartamount--;
                         }
@@ -689,7 +717,7 @@ int main(int argc, char* argv[])
                            if(i<=4) slashdown.tick();
                             graphics.presentScene();
                             
-                            SDL_Delay(60);
+                            SDL_Delay(50);
                         }
                         if (cha.touchacid() || cha.ishurt(slime1.rect) && slime1.isalive || cha.ishurt(slime2.rect) && slime2.isalive || cha.ishurt(slime3.rect) && slime3.isalive)
                         {
@@ -803,7 +831,7 @@ int main(int argc, char* argv[])
 
                             graphics.presentScene();
                             
-                            SDL_Delay(60);
+                            SDL_Delay(50);
                         }
                         if (cha.touchacid() || cha.ishurt(slime1.rect) && slime1.isalive || cha.ishurt(slime2.rect) && slime2.isalive || cha.ishurt(slime3.rect) && slime3.isalive)
                         {
@@ -916,7 +944,7 @@ int main(int argc, char* argv[])
                             if (i <= 4)  slashleft.tick();
                             graphics.presentScene();
                             
-                            SDL_Delay(60);
+                            SDL_Delay(50);
                         }
                         if (cha.touchacid() || cha.ishurt(slime1.rect) && slime1.isalive || cha.ishurt(slime2.rect) && slime2.isalive || cha.ishurt(slime3.rect) && slime3.isalive)
                         {
@@ -1754,7 +1782,7 @@ int main(int argc, char* argv[])
                             moveup.tick();
                             graphics.presentScene();
                             
-                            SDL_Delay(60);
+                            SDL_Delay(50);
 
 
 
@@ -1797,6 +1825,7 @@ int main(int argc, char* argv[])
                         bool collided = false;
                         for (int i = 1;i <= 7;i++)
                         {
+
                             graphics.prepareScene(background);
                             graphics.renderheart(heartless, heart, cha.heartamount, graphics);
                             cha.turnWest();
@@ -1882,7 +1911,8 @@ int main(int argc, char* argv[])
                                     if (i <= 6) slimeleft3.tick();
                                 }
                             }
-                            if (i==4&&!collided && (cha.ishurt(slime1.rect) || cha.ishurt(slime2.rect) || cha.ishurt(slime3.rect)))
+                           if (i == 4 && !collided && (cha.ishurt(slime1.rect)&&slime1.isalive || cha.ishurt(slime2.rect)&&slime2.isalive || cha.ishurt(slime3.rect)&&slime3.isalive))
+                       
                             {
                                 cha.heartamount--;
                                 collided = true;
@@ -1890,7 +1920,7 @@ int main(int argc, char* argv[])
                             moveleft.tick();
                             graphics.presentScene();
                             
-                            SDL_Delay(60);
+                            SDL_Delay(50);
 
 
 
@@ -2018,13 +2048,19 @@ int main(int argc, char* argv[])
                                     else { graphics.render(slime3.x, slime3.y, slimeleft3); }
                                     if (i <= 6) slimeleft3.tick();
                                 }
+                                if (i == 4 && !collided && (cha.ishurt(slime1.rect) && slime1.isalive || cha.ishurt(slime2.rect) && slime2.isalive || cha.ishurt(slime3.rect) && slime3.isalive))
+                                {
+                                    collided = true;
+                                    cha.heartamount--;
+                                }
+
                             }
 
                           
                             moveright.tick();
                             graphics.presentScene();
                             
-                            SDL_Delay(60);
+                            SDL_Delay(50);
 
 
                         }
@@ -2153,7 +2189,7 @@ int main(int argc, char* argv[])
 
                             graphics.presentScene();
                             
-                            SDL_Delay(60);
+                            SDL_Delay(50);
 
 
                         }
@@ -2203,6 +2239,7 @@ int main(int argc, char* argv[])
             {
                 slime3.died = 1;
             }
+  
             if (slime1.died||slime2.died||slime3.died)
             {
                 if (slime1.died)
@@ -2302,7 +2339,7 @@ int main(int argc, char* argv[])
                         }
                         graphics.presentScene();
                         
-                        SDL_Delay(60);
+                        SDL_Delay(50);
                 }
                 if (slime1.died)
                 {
@@ -2427,8 +2464,9 @@ int main(int argc, char* argv[])
                 graphics.presentScene();
                 
                 SDL_Delay(500);
-                quit = true;
+              
             }
+            quit = true;
         }     
         break;
         }
@@ -2443,6 +2481,7 @@ int main(int argc, char* argv[])
             case SDL_KEYDOWN:
                 if (event.key.keysym.scancode == SDL_SCANCODE_SPACE)
                 {
+        
                     for (int i = 1;i <= 7;i++)
                     {
 
@@ -2465,14 +2504,21 @@ int main(int argc, char* argv[])
                         {
                             graphics.render(cha.x, cha.y, moveright);
                         }
+                          graphics.renderfire(firestate, graphics, vecfire, warning, burning, flimit);
                         graphics.presentScene();
                         
-                        SDL_Delay(60);
+                        SDL_Delay(50);
                     }
+                    if (cha.isburnt(vecfire, firestate))
+                    {
+                        cha.heartamount--;
+                    }
+                    firestate = (firestate + 1) % 3;
                
                 }
                 if (event.key.keysym.scancode == SDL_SCANCODE_Z)
                 {
+                   
                     if (isfacingright)
                     {
                         for (int i = 1;i <= 7;i++)
@@ -2486,7 +2532,7 @@ int main(int argc, char* argv[])
                             }
                             graphics.presentScene();
                             
-                            SDL_Delay(60);
+                            SDL_Delay(50);
 
                         }
                     }
@@ -2494,6 +2540,18 @@ int main(int argc, char* argv[])
                     {
                         for (int i = 1;i <= 7;i++)
                         {
+                            if (slime1.heartamount <= 0 && slime1.isalive)
+                            {
+                                slime1.canhurt = 0;
+                            }
+                            if (slime2.heartamount <= 0 && slime2.isalive)
+                            {
+                                slime2.canhurt = 0;
+                            }
+                            if (slime3.heartamount <= 0 && slime3.isalive)
+                            {
+                                slime3.canhurt = 0;
+                            }
                             graphics.prepareScene(background);
                             graphics.renderheart(heartless, heart, cha.heartamount, graphics);
                                     if (slashleft.currentFrame != 1)
@@ -2507,7 +2565,7 @@ int main(int argc, char* argv[])
                             if (i <= 4) slashleft.tick();
                             graphics.presentScene();
                             
-                            SDL_Delay(60);
+                            SDL_Delay(50);
                         }
                      
                     }
@@ -2522,7 +2580,7 @@ int main(int argc, char* argv[])
                             if (i <= 4) slashdown.tick();
                             graphics.presentScene();
                             
-                            SDL_Delay(60);
+                            SDL_Delay(50);
                         }
                     }
                     else if (isfacingup)
@@ -2537,31 +2595,15 @@ int main(int argc, char* argv[])
 
                             graphics.presentScene();
                             
-                            SDL_Delay(60);
+                            SDL_Delay(50);
                         }
                     
                     }
-                    else if (isfacingleft)
+                    if (cha.isburnt(vecfire, firestate))
                     {
-                        for (int i = 1;i <= 7;i++)
-                        {
-                            graphics.prepareScene(background);
-                            graphics.renderheart(heartless, heart, cha.heartamount, graphics);
-                            if (slashleft.currentFrame != 1)
-                            {
-                                graphics.render(cha.x, cha.y, slashleft);
-                            }
-                            else
-                            {
-                                graphics.render(cha.x - 30, cha.y, slashleft);
-                            }
-                            if (i <= 4)  slashleft.tick();
-                            graphics.presentScene();
-
-                            SDL_Delay(60);
-                        }
-
+                        cha.heartamount--;
                     }
+                    firestate = (firestate + 1) % 3;
                 }
                 if (event.key.keysym.scancode == SDL_SCANCODE_X)
                 {
@@ -2585,6 +2627,7 @@ int main(int argc, char* argv[])
                                 {
                                     graphics.render(cha.x, cha.y - (14 - i) * 4, moveright);
                                 }
+                                graphics.renderfire(firestate, graphics, vecfire, warning, burning, flimit);
                                 moveright.tick();
                                 graphics.presentScene();
                                 
@@ -2619,6 +2662,7 @@ int main(int argc, char* argv[])
                                 {
                                     graphics.render(cha.x, cha.y - (14 - i) * 4, moveup);
                                 }
+                                graphics.renderfire(firestate, graphics, vecfire, warning, burning, flimit);
                                 moveup.tick();
                                 graphics.presentScene();
                                 
@@ -2652,6 +2696,7 @@ int main(int argc, char* argv[])
                                 {
                                     graphics.render(cha.x, cha.y - (14 - i) * 4, movedown);
                                 }
+                                graphics.renderfire(firestate, graphics, vecfire, warning, burning, flimit);
                                 movedown.tick();
                                 graphics.presentScene();
                                 
@@ -2686,6 +2731,7 @@ int main(int argc, char* argv[])
                                 {
                                     graphics.render(cha.x, cha.y - (14 - i) * 4, moveleft);
                                 }
+                                graphics.renderfire(firestate, graphics, vecfire, warning, burning, flimit);
                                 moveleft.tick();
                                 graphics.presentScene();
                                 
@@ -2698,6 +2744,11 @@ int main(int argc, char* argv[])
                             isfacingright = false;
                         }
                     }
+                    if (cha.isburnt(vecfire, firestate))
+                    {
+                        cha.heartamount--;
+                    }
+                    firestate = (firestate + 1) % 3;
 
                 }
                 if (event.key.keysym.scancode == SDL_SCANCODE_UP)
@@ -2714,18 +2765,24 @@ int main(int argc, char* argv[])
                             
                             cha.move();
                             graphics.render(cha.x, cha.y, moveup);
-
+                            graphics.renderfire(firestate, graphics, vecfire, warning, burning, flimit);
                             moveup.tick();
                             graphics.presentScene();
                             
-                            SDL_Delay(60);
+                            SDL_Delay(50);
                         }
                         idling = true;
                         isfacingup = true;
                         isfacingright = false;
                         isfacingleft = false;
                         isfacingdown = false;
+                    
                     }
+                    if (cha.isburnt(vecfire, firestate))
+                    {
+                        cha.heartamount--;
+                    }
+                    firestate = (firestate + 1) % 3;
                 }
                 if (event.key.keysym.scancode == SDL_SCANCODE_LEFT)
 
@@ -2742,11 +2799,11 @@ int main(int argc, char* argv[])
                          
                             cha.move();
                             graphics.render(cha.x, cha.y, moveleft);
-
+                            graphics.renderfire(firestate, graphics, vecfire, warning, burning, flimit);
                             moveleft.tick();
                             graphics.presentScene();
                             
-                            SDL_Delay(60);
+                            SDL_Delay(50);
 
 
                         }
@@ -2756,8 +2813,12 @@ int main(int argc, char* argv[])
                         isfacingup = false;
                         isfacingright = false;
                     }
+                    if (cha.isburnt(vecfire, firestate))
+                    {
+                        cha.heartamount--;
+                    }
+                    firestate = (firestate + 1) % 3;
                 }
-
                 if (event.key.keysym.scancode == SDL_SCANCODE_RIGHT)
                 {
                     if (cha.notborder('r'))
@@ -2772,10 +2833,11 @@ int main(int argc, char* argv[])
                             graphics.renderheart(heartless, heart, cha.heartamount, graphics);
                             cha.move();
                             graphics.render(cha.x, cha.y, moveright);
+                            graphics.renderfire(firestate, graphics, vecfire, warning, burning, flimit);
                             moveright.tick();
                             graphics.presentScene();
                             
-                            SDL_Delay(60);
+                            SDL_Delay(50);
                         }
                         idling = true;
                         isfacingright = true;
@@ -2783,6 +2845,11 @@ int main(int argc, char* argv[])
                         isfacingdown = false;
                         isfacingleft = false;
                     }
+                    if (cha.isburnt(vecfire, firestate))
+                    {
+                        cha.heartamount--;
+                    }
+                    firestate = (firestate + 1) % 3;
                 }
                 if (event.key.keysym.scancode == SDL_SCANCODE_DOWN)
                 {
@@ -2797,12 +2864,12 @@ int main(int argc, char* argv[])
                             graphics.renderheart(heartless, heart, cha.heartamount, graphics);
                             cha.move();
                             graphics.render(cha.x, cha.y, movedown);
-                        
+                            graphics.renderfire(firestate, graphics, vecfire, warning, burning, flimit);
                             movedown.tick();
 
                             graphics.presentScene();
                             
-                            SDL_Delay(60);
+                            SDL_Delay(50);
 
 
                         }
@@ -2812,6 +2879,11 @@ int main(int argc, char* argv[])
                         isfacingright = false;
                         isfacingup = false;
                     }
+                    if (cha.isburnt(vecfire, firestate))
+                    {
+                        cha.heartamount--;
+                    }
+                    firestate = (firestate + 1) % 3;
                 }
 
                 break;
@@ -2824,11 +2896,7 @@ int main(int argc, char* argv[])
             {
 
                 graphics.prepareScene(background);
-                if (key.showing)
-                {
-                    graphics.renderTexture(keyimg, key.x, key.y);
-
-                }
+               
                 if (isfacingup)
                 {
 
@@ -2853,17 +2921,17 @@ int main(int argc, char* argv[])
                     idle.tick();
 
                 }
+                graphics.renderfire(firestate, graphics, vecfire, warning, burning, flimit);
                 graphics.renderheart(heartless, heart, cha.heartamount, graphics);
                 graphics.presentScene();
-                
+               
             }
-
             break;
          
         }
 
         
-        SDL_Delay(60);
+        SDL_Delay(100);
 
 
  
