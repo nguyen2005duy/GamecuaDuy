@@ -6,6 +6,7 @@
 #define INITIAL_SPEEDY 10//9.857142
 #define INITIAL_RECSPEEDX 64/7
 #define INITIAL_RECSPEEDY 70/7//68
+#include "defs.h"
 #include <SDL.h>;
 #include <SDL_image.h>
 #include <iostream>
@@ -37,7 +38,7 @@ struct fire
     void generatefirelocation()
     {
         int randx = rand() % 11;
-            int randy = rand() % 5;
+            int randy = rand() % 7;
             while (randx == 5 || randy == 3)
             {
                 randx = rand() % 11;
@@ -45,10 +46,27 @@ struct fire
             }
         x = 65 + 61 * randx;
         y = 68 + 67 * randy;
-        rx = 77+52 * randx;
-        ry = 70 + 54 * randy;
+        rx = 92+61 * randx;
+        ry = 94 + 75 * randy;
     }//65  58 //
 
+};
+struct fireball
+{
+    int x;
+    int y;
+    int ry;
+    void generatefireballlocation()
+    {
+        int randy = rand() % 7;
+        while ( randy == 3)
+        {
+            randy = rand() % 7;
+        }
+        x = 62;
+        y = 61 + 69 * randy;
+        ry = 94 + 70 * randy;
+    }
 };
 struct Key
 {
@@ -58,115 +76,8 @@ struct Key
     int locx;
     int locy;
 };
-struct En {
-    SDL_Rect rect;
-    bool canhurt = 1;
-    double x, y;
-    bool isfacingright = 0;
-    bool isfacingleft = 0;
-    bool isfacingup = 0;
-    bool isfacingdown = 0;
-    bool died = 0;
-    int movelimit;
-    int heartamount = 3;
-    int limitcount=1;
-    bool isalive = 1;
-    double dx = 0, dy = 0;
-    double recspeedx = INITIAL_RECSPEEDX;
-    double recspeedy = INITIAL_RECSPEEDY;
-    double drecx=0;
-    double drecy=0;
-    double speedx = INITIAL_SPEEDX;
-    double speedy = INITIAL_SPEEDY;
-    En(double _x, double _y,int _movelimit,int _lx, int _ly)
-    {
-        movelimit = _movelimit;
-        x = _x;
-        y = _y;
-        rect.x = _lx;
-        rect.y = _ly;
-        rect.w = 1;
-        rect.h = 1;
-    }
-
-    void move() {
-        x += dx;
-        y += dy;
-        rect.x += drecx;
-        rect.y += drecy;
-    }
-    
-     void turnNorth() {
-        dy = -speedy;
-        dx = 0;
-        drecx =  0;
-        drecy = -recspeedy;
-    }
-    void turnSouth() {
-        dy = speedy;
-        dx = 0;
-        drecx = 0;
-        drecy = recspeedy;
-    }
-    void turnWest() {
-        dy = 0;
-        dx = -speedx;
-        drecx = -recspeedx;
-        drecy = 0;
-    }
-    void turnEast() {
-        dy = 0;
-        dx = speedx;
-        drecx = recspeedx;
-        drecy = 0;
-    }
-    int cx()
-    {
-        return rect.x;
-    }
-    int cy()
-    {
-        return rect.y;
-    }
-    bool notborder(char direction)
-    {
-        switch (direction)
-        {
-        case 'u':
-
-            if (y - INITIAL_SPEEDY * 7 <= 30)
-            {
-                return false;
-            }
-
-            break;
-        case 'd':
-
-            if (y + INITIAL_SPEEDY * 7 >= 520)
-            {
-                return false;
-            }
-            break;
-        case 'r':
-            if (x + INITIAL_SPEEDX * 7 >= 700)
-            {
-                return false;
-            }
-            break;
-        case 'l':
-            if (x - INITIAL_SPEEDX * 7 <= 30)
-            {
-                return false;
-            }
-            break;
-        }
-        return true;
-    }
-
-};
-
 struct Cha {
-    SDL_Rect rect ;
+    SDL_Rect rect;
     bool isfacingup = 0;
     bool isfacingdown = 1;
     bool isfacingright = 0;
@@ -189,17 +100,17 @@ struct Cha {
         rect.y = 66;
         rect.w = 62;
         rect.h = 67;
-      
-     
+
+
     }
     void newmap()
     {
-        rect.x = 299;
-        rect.y = 45;
-        rect.w = 45;
-    rect.h = 45;
-    recspeedx = 49 / 7;
-    recspeedy = 56 / 7;
+        rect.x = 367;
+        rect.y = 64;
+        rect.w = 67;
+        rect.h = 74;
+        recspeedx = 63/7;
+        recspeedy = 70 / 7;
     }
     void move() {
         x += dx;
@@ -345,10 +256,10 @@ struct Cha {
     }
     bool ishurt(SDL_Rect monster)
     {
-   
-        return inside(monster.x,monster.y,rect);
+
+        return inside(monster.x, monster.y, rect);
     }
-    bool slashthrough(SDL_Rect monster,bool isfacingright, bool isfacingup, bool isfacingleft, bool isfacingdown)
+    bool slashthrough(SDL_Rect monster, bool isfacingright, bool isfacingup, bool isfacingleft, bool isfacingdown)
     {
         SDL_Rect sr;
         sr.w = 62;
@@ -356,7 +267,7 @@ struct Cha {
         if (isfacingright)
         {
             sr.x = rect.x + 64;
-                sr.y = rect.y;
+            sr.y = rect.y;
         }
         else if (isfacingleft)
         {
@@ -373,16 +284,16 @@ struct Cha {
             sr.x = rect.x;
             sr.y = rect.y - 70;
         }
-        
+
         return  inside(monster.x, monster.y, sr);
 
     }
-    bool isburnt(vector <fire> vecfire,int firestate)
+    bool isburnt(vector <fire> vecfire, int firestate,int flimit)
     {
         bool burnt = 0;
         if (firestate == 1)
         {
-            for (size_t i = 0;i < vecfire.size();i++)
+            for (size_t i = 0;i <flimit;i++)
             {
                 if (inside(vecfire[i].rx, vecfire[i].ry, rect))
                 {
@@ -392,8 +303,145 @@ struct Cha {
         }
         return burnt;
     }
+    bool fireballed(int y, SDL_Rect rect)
+    {
+        return (rect.y+rect.h >= y) && (rect.y <= y);
+    }
+    bool isfireballed(vector<fireball>vecfireball, int fireballstate)
+    {
+        bool burnt = 0;
+        if (fireballstate == 2)
+        {
+            for (size_t i = 0;i < 4;i++)
+            {
+                if (fireballed(vecfireball[i].ry,rect))
+                {
+                    burnt = 1;
+                }
+            }
+        }
+        return burnt;
+    }
 
 };
+
+struct En {
+    SDL_Rect rect;
+    bool usingfireball = 0;
+    bool canhurt = 1;
+    double x, y;
+    bool isfacingright = 0;
+    bool isfacingleft = 0;
+    bool isfacingup = 0;
+    bool isfacingdown = 0;
+    bool died = 0;
+    int movelimit;
+    int heartamount = 3;
+    int limitcount=1;
+    bool isalive = 1;
+    double dx = 0, dy = 0;
+    double recspeedx = INITIAL_RECSPEEDX;
+    double recspeedy = INITIAL_RECSPEEDY;
+    double drecx=0;
+    double drecy=0;
+    double speedx = INITIAL_SPEEDX;
+    double speedy = INITIAL_SPEEDY;
+    En(double _x, double _y,int _movelimit,int _lx, int _ly)
+    {
+        movelimit = _movelimit;
+        x = _x;
+        y = _y;
+        rect.x = _lx;
+        rect.y = _ly;
+        rect.w = 1;
+        rect.h = 1;
+    }
+    bool lookingright(Cha cha)
+    {
+        if (cha.x >= SCREEN_WIDTH / 2)
+        {
+            return 1;
+
+        }
+        else return false;
+    }
+
+    void move() {
+        x += dx;
+        y += dy;
+        rect.x += drecx;
+        rect.y += drecy;
+    }
+    
+     void turnNorth() {
+        dy = -speedy;
+        dx = 0;
+        drecx =  0;
+        drecy = -recspeedy;
+    }
+    void turnSouth() {
+        dy = speedy;
+        dx = 0;
+        drecx = 0;
+        drecy = recspeedy;
+    }
+    void turnWest() {
+        dy = 0;
+        dx = -speedx;
+        drecx = -recspeedx;
+        drecy = 0;
+    }
+    void turnEast() {
+        dy = 0;
+        dx = speedx;
+        drecx = recspeedx;
+        drecy = 0;
+    }
+    int cx()
+    {
+        return rect.x;
+    }
+    int cy()
+    {
+        return rect.y;
+    }
+    bool notborder(char direction)
+    {
+        switch (direction)
+        {
+        case 'u':
+
+            if (y - INITIAL_SPEEDY * 7 <= 30)
+            {
+                return false;
+            }
+
+            break;
+        case 'd':
+
+            if (y + INITIAL_SPEEDY * 7 >= 520)
+            {
+                return false;
+            }
+            break;
+        case 'r':
+            if (x + INITIAL_SPEEDX * 7 >= 700)
+            {
+                return false;
+            }
+            break;
+        case 'l':
+            if (x - INITIAL_SPEEDX * 7 <= 30)
+            {
+                return false;
+            }
+            break;
+        }
+        return true;
+    }
+
+};
+
 
 
 

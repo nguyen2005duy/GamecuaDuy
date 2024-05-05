@@ -10,6 +10,7 @@
 #include <vector>
 #include "game.h"
 #define FIRELIMIT 30;
+#define FIREBALLLIMIT 4;
 using namespace std;
 void renderTexture(SDL_Texture* texture, int x, int y,
     SDL_Renderer* renderer)
@@ -35,7 +36,10 @@ SDL_Texture* loadTexture(const char* filename, SDL_Renderer* renderer)
 
     return texture;
 }
-
+struct ui
+{
+    bool hovered = 0;
+};
 struct Sprite {
     SDL_Texture* texture;
     std::vector<SDL_Rect> clips;
@@ -98,6 +102,11 @@ struct Graphics {
             logErrorAndExit("SDL_mixer could not initialize! SDL_mixer Error: %s\n",
                 Mix_GetError());
         }
+        if (TTF_Init() == -1) {
+            logErrorAndExit("SDL_ttf could not initialize! SDL_ttf Error: ",
+                TTF_GetError());
+        }
+
 
     }
 
@@ -133,6 +142,7 @@ struct Graphics {
 
         SDL_RenderCopy(renderer, texture, NULL, &dest);
     }
+   
 
     void blitRect(SDL_Texture* texture, SDL_Rect* src, int x, int y)
     {
@@ -154,8 +164,41 @@ struct Graphics {
         SDL_DestroyWindow(window);
         SDL_Quit();
         Mix_Quit();
-    }
+        TTF_Quit();
 
+    }
+    TTF_Font* loadFont(const char* path, int size)
+    {
+        TTF_Font* gFont = TTF_OpenFont(path, size);
+        if (gFont == nullptr) {
+            SDL_LogMessage(SDL_LOG_CATEGORY_APPLICATION,
+                SDL_LOG_PRIORITY_ERROR,
+                "Load font %s", TTF_GetError());
+        }
+        return gFont;
+    }
+    SDL_Texture* renderText(const char* text,
+        TTF_Font* font, SDL_Color textColor)
+    {
+        SDL_Surface* textSurface =
+            TTF_RenderText_Solid(font, text, textColor);
+        if (textSurface == nullptr) {
+            SDL_LogMessage(SDL_LOG_CATEGORY_APPLICATION,
+                SDL_LOG_PRIORITY_ERROR,
+                "Render text surface %s", TTF_GetError());
+            return nullptr;
+        }
+
+        SDL_Texture* texture =
+            SDL_CreateTextureFromSurface(renderer, textSurface);
+        if (texture == nullptr) {
+            SDL_LogMessage(SDL_LOG_CATEGORY_APPLICATION,
+                SDL_LOG_PRIORITY_ERROR,
+                "Create texture from text %s", SDL_GetError());
+        }
+        SDL_FreeSurface(textSurface);
+        return texture;
+    }
     void render(int x, int y, const Sprite& sprite) {
         const SDL_Rect* clip = sprite.getCurrentClip();
         SDL_Rect renderQuad = { x, y, clip->w, clip->h };
@@ -183,12 +226,51 @@ struct Graphics {
         }
         return gMusic;
     }
-    void renderfire(int firestate, Graphics graphics, vector<fire> &vecfire, SDL_Texture* warning, SDL_Texture* burning, int flimit)
+    void renderfireball(Graphics graphics, vector<fireball>& vecfireball, int fireballstate, Sprite& fireballleft, Sprite& fireballright,int &fireballloc,int check, SDL_Texture* warninglane)
+    {
+        switch (fireballstate)
+        {
+        case 0:
+            for (int i = 0;i < 4; i++)
+            {
+                fireball newfireball;
+                newfireball.generatefireballlocation();
+                vecfireball[i] = newfireball;
+            }
+            break;
+        case 1:
+            for (int i = 0;i < 4; i++)
+            {
+                graphics.renderTexture(warninglane,62, vecfireball[i].y);
+            }
+            break;
+        case 2:
+            for (int i = 0;i < 4; i++)
+            {
+                graphics.render(62 + vecfireball[i].x * fireballloc*1, vecfireball[i].y, fireballleft);
+                graphics.render(671 - vecfireball[i].x * fireballloc*1, vecfireball[i].y, fireballright);
+            }
+            fireballloc = fireballloc % 5 + 1;
+            if (check<=3||check>=5)
+            {
+                fireballleft.tick();
+                fireballright.tick();
+            }
+            
+            break;
+        }
+   
+    }
+    void renderfire(int firestate, Graphics graphics, vector<fire> &vecfire, SDL_Texture* warning, SDL_Texture* burning, int &flimit)
     {
         switch (firestate)
         {
         case 0:
             flimit = rand() % FIRELIMIT + 1;
+            while (flimit <= 10)
+            {
+                flimit = rand() % FIRELIMIT + 1;
+            }
             for (int i = 0;i < flimit; i++)
             {
                 fire newfire;
