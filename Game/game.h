@@ -38,15 +38,38 @@ struct fire
     void generatefirelocation()
     {
         int randx = rand() % 11;
-            int randy = rand() % 7;
-            while (randx == 5 || randy == 3)
-            {
-                randx = rand() % 11;
-                randy = rand() % 7;
-            }
+        int randy = rand() % 7;
+        while (randx == 5 || randy == 3)
+        {
+            randx = rand() % 11;
+            randy = rand() % 7;
+        }
         x = 65 + 61 * randx;
         y = 68 + 67 * randy;
-        rx = 92+61 * randx;
+        rx = 92 + 61 * randx;
+        ry = 94 + 75 * randy;
+    }//65  58 //
+
+};
+struct bossheart
+{
+
+    int x;
+    int y;
+    int rx;
+    int ry;
+    void generatebossheartlocation()
+    {
+        int randx = rand() % 11;
+        int randy = rand() % 7;
+        while (randx == 5 || randy == 3)
+        {
+            randx = rand() % 11;
+            randy = rand() % 7;
+        }
+        x = 65 + 61 * randx;
+        y = 68 + 67 * randy;
+        rx = 92 + 61 * randx;
         ry = 94 + 75 * randy;
     }//65  58 //
 
@@ -83,6 +106,7 @@ struct Cha {
     bool isfacingright = 0;
     bool isfacingleft = 0;
     double x, y;
+    bool moved;
     // rect.x = 64;
      //rect.y = 82;
     int heartamount;
@@ -103,6 +127,16 @@ struct Cha {
 
 
     }
+    void reset()
+    {
+         x = 65;
+        y = 50;
+        rect.x = 54;
+        rect.y = 66;
+        rect.w = 62;
+        rect.h = 67;
+        heartamount = 3;
+    }
     void newmap()
     {
         rect.x = 367;
@@ -113,6 +147,7 @@ struct Cha {
         recspeedy = 70 / 7;
     }
     void move() {
+        moved = true;
         x += dx;
         y += dy;
         rect.x += drecx;
@@ -322,7 +357,71 @@ struct Cha {
         }
         return burnt;
     }
-
+    SDL_Rect getrect()
+    {
+        return rect;
+    }
+    bool notbossloc( bool jump,char direction)
+    {
+        SDL_Rect boss;
+        if (direction=='r' && jump)
+        {
+            boss.x = rect.x + rect.w * 2;
+            boss.y = rect.y;
+            boss.w = rect.w;
+            boss.h = rect.h;
+        }
+        else if (direction=='l' && jump)
+        {
+            boss.x = rect.x - rect.w * 2;
+            boss.y = rect.y;
+            boss.w = rect.w;
+            boss.h = rect.h;
+        }
+        else if (direction=='u' && jump)
+        {
+            boss.x = rect.x;
+            boss.y = rect.y - rect.h * 2;
+            boss.w = rect.w;
+            boss.h = rect.h;
+        }
+        else if (direction=='d' && jump)
+        {
+            boss.x = rect.x;
+            boss.y = rect.y + rect.h * 2;
+            boss.w = rect.w;
+            boss.h = rect.h;
+        }
+        else if (direction=='r' && !jump)
+        {
+            boss.x = rect.x + rect.w;
+            boss.y = rect.y;
+            boss.w = rect.w;
+            boss.h = rect.h;
+        }
+        else if (direction=='l' && !jump)
+        {
+            boss.x = rect.x - rect.w;
+            boss.y = rect.y;
+            boss.w = rect.w;
+            boss.h = rect.h;
+        }
+        else if (direction=='u' && !jump)
+        {
+            boss.x = rect.x;
+            boss.y = rect.y - rect.h;
+            boss.w = rect.w;
+            boss.h = rect.h;
+        }
+        else if (direction=='d' && !jump)
+        {
+            boss.x = rect.x;
+            boss.y = rect.y + rect.h;
+            boss.w = rect.w;
+            boss.h = rect.h;
+        }
+        return !inside(399, 303, boss);
+    }
 };
 
 struct En {
@@ -346,15 +445,34 @@ struct En {
     double drecy=0;
     double speedx = INITIAL_SPEEDX;
     double speedy = INITIAL_SPEEDY;
-    En(double _x, double _y,int _movelimit,int _lx, int _ly)
+    int resetx;
+    int resety;
+    int resetrectx;
+    int resetrecty;
+    En(double _x, double _y, int _movelimit, int _lx, int _ly)
     {
         movelimit = _movelimit;
         x = _x;
+        resetx = x;
         y = _y;
+        resety = y;
         rect.x = _lx;
         rect.y = _ly;
+        resetrectx = rect.x;
+        resetrecty = rect.y;
         rect.w = 1;
         rect.h = 1;
+    }
+    void reset()
+    {
+        x = resetx;
+        y = resety;
+        rect.x = resetrectx;
+        rect.y = resetrecty;
+        limitcount = 1;
+        heartamount = 3;
+        isalive = 1;
+        died = 0;
     }
     bool lookingright(Cha cha)
     {
@@ -439,6 +557,7 @@ struct En {
         }
         return true;
     }
+   
 
 };
 
