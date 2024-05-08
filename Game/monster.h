@@ -68,6 +68,16 @@ const int FIREBALL_RIGHT_CLIPS[][4] =
     {103,14,69,69},
     {28,16,61,47},
 };
+const int BOSS_DEATH_CLIPS[][4]
+{
+    {67,105,60,87},
+    {258,22,64,170},
+    {444,59,66,133},
+    {631,125,80,67},
+    {829,163,80,30},
+    {1020,156,72,35}
+};
+const int BOSS_DEATH_FRAME = sizeof(BOSS_DEATH_CLIPS) / sizeof(int) / 4;
 const int FIREBALL_LEFT_FRAME = sizeof(FIREBALL_LEFT_CLIPS) / sizeof(int) / 4;
 const int FIREBALL_RIGHT_FRAME = FIREBALL_LEFT_FRAME;
 const int BOSS_IDLEL_FRAME = sizeof(BOSS_IDLEL_CLIPS) / sizeof(int) / 4;

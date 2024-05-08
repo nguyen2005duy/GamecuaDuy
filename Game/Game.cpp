@@ -86,6 +86,8 @@ int main(int argc, char* argv[])
     SDL_Texture* keyimg = loadTexture(KEYIMAGE,graphics.renderer);
     SDL_Texture* warning = loadTexture("img\\Warning.png", graphics.renderer);
     SDL_Texture* warninglane = loadTexture("img\\warninglane.png", graphics.renderer);
+    SDL_Texture* chadial = loadTexture("img\\characterdialogue.png", graphics.renderer);
+    dialogue dial;
     Key key;
     int fireballoc = 0;
     key.x = 370;
@@ -143,6 +145,9 @@ int main(int argc, char* argv[])
     SDL_Texture* bossi = graphics.loadTexture("img\\boss.png");
     bossidle.init(bossi, BOSS_IDLE_FRAME, BOSS_IDLE_CLIPS);
     Sprite bossidlel;
+    Sprite bossdeath;
+    SDL_Texture*bossdeathi = graphics.loadTexture("img\\bossdeath.png");
+    bossdeath.init(bossdeathi, BOSS_DEATH_FRAME, BOSS_DEATH_CLIPS);
     SDL_Texture* bossil = graphics.loadTexture("img\\bossl.png");
     bossidlel.init(bossil, BOSS_IDLEL_FRAME, BOSS_IDLEL_CLIPS);
     SDL_Texture* fireballL = graphics.loadTexture("img\\fireballleft.png");
@@ -187,11 +192,13 @@ int main(int argc, char* argv[])
     TTF_Font* pausefont = graphics.loadFont("font\\ui.ttf", 25);
     TTF_Font* gameoverfont = graphics.loadFont("font\\gameover.otf", 90);
     TTF_Font* replayfont = graphics.loadFont("font\\gameover.otf", 60);
-
-
+    TTF_Font* dialfont = graphics.loadFont("font\\charactersdialouge.otf", 20);
     SDL_Color color = { 21, 21, 21, 225 };
     SDL_Color colorhover = { 226,226,226,226 };
     SDL_Color colorhovere = {255,255,255,255};
+    SDL_Color chadialcolour = { 32,201,207,255 };
+    SDL_Color bossdialcolour = { 218,50,4,255 };
+
     SDL_Texture* gameover = graphics.renderText("Game Over", gameoverfont, colorhover);
     SDL_Texture* gamename = graphics.renderText("Mystic Dungeon", gameoverfont, colorhover);
     SDL_Texture* menu = graphics.renderText("Menu", menufont, color);
@@ -230,19 +237,39 @@ int main(int argc, char* argv[])
     SDL_Texture* backhovered = graphics.renderText("Back", uifont, colorhovere);
     SDL_Texture* next = graphics.renderText("Next", uifont, colorhover);
     SDL_Texture* nexthover = graphics.renderText("Next", uifont, colorhovere);
+
     SDL_Texture* madeby = graphics.renderText("This game was made and owned by Nguyen Duc Duy", uifont, colorhovere);
     SDL_Texture* goal = graphics.renderText("Your goal is to reach to the end of the dungeon ", uifont, colorhovere);
     SDL_Texture* goalnext = graphics.renderText("and obtain the master sword", uifont, colorhovere);
     SDL_Texture* nextto = graphics.renderText("Please refer to the next page for the controls of the game", uifont, colorhovere);
     SDL_Texture* purpose = graphics.renderText("This was made as a school project", uifont, colorhovere);
-    ui backui;
+    SDL_Texture* looklike = graphics.renderText("Looks like this dungeon is getting slimy right from the start.", dialfont, chadialcolour);
+    SDL_Texture* pressany = graphics.renderText("Press any key to continue.........", dialfont, colorhover);
+    SDL_Texture* tips = graphics.renderText("Tips: Hit the boss's heart!!!!", dialfont, bossdialcolour);
+    SDL_Texture* keyshow = graphics.renderText("Victory shines as the key appears, unlocking the path", dialfont, colorhover);
+    SDL_Texture* keyshow2 = graphics.renderText("to greater challenges ahead.", dialfont, colorhover);
+    SDL_Texture* enter1 = graphics.renderText("So, you're the one who's been causing all this chaos.", dialfont, chadialcolour);
+    SDL_Texture* boss1 = graphics.renderText("Ah, the brave hero has finally arrived.", dialfont, bossdialcolour);
+    SDL_Texture* boss2 = graphics.renderText("I must say, I expected more from you.", dialfont, bossdialcolour);
+    SDL_Texture* cha1 = graphics.renderText("You won't get away with this. Your reign of terror ends here.", dialfont, chadialcolour);
+    SDL_Texture* bossdial = graphics.loadTexture("img\\bossdialogue.png");
     ui nextui;
+    ui backui;
     bossheart bossh;
-    SDL_Texture* bossheart = loadTexture("img\\bossheart.png",graphics.renderer);
+    SDL_Texture *msword = graphics.loadTexture("img\\mastersword.png");
+    Key ms;
+    ms.x = 378;
+    ms.y = 258;
+    ms.locx = 400;
+    ms.locy = 300;
+    bossh.generatebossheartlocation();
+    SDL_Texture* bossheartt = loadTexture("img\\bossheart.png",graphics.renderer);
+
     while (!quit && !gameOver(cha)) {
         SDL_GetMouseState(&x, &y);
         //  cerr << x << "," << y;
       //  graphics.prepareScene(background);
+
         while (SDL_PollEvent(&event)) {
             if (changedmap)
             {
@@ -492,6 +519,19 @@ int main(int argc, char* argv[])
             case 1:
         {
         //start of map1 and zero
+                while (dial.first)
+                {
+                    graphics.prepareScene(background);
+                    graphics.render(slime1.x, slime1.y, slimeright1);
+                    graphics.render(slime2.x, slime2.y, slimeleft2);
+                    graphics.render(cha.x, cha.y, movedown);
+                    graphics.renderTexture(chadial,36, 384);
+                    graphics.renderTexture(looklike, 205, 446);
+                    graphics.renderTexture(pressany, 210, 486);
+                    graphics.presentScene();
+                    waitUntilKeyPressed();
+                    dial.first = 0;
+            }
             switch (event.type) {
             case SDL_QUIT:
                 exit(0);
@@ -2812,6 +2852,35 @@ int main(int argc, char* argv[])
         if (!slime1.isalive && !slime2.isalive && !slime3.isalive && !key.obtained&&currentmap==0)
         {
             key.showing = true;
+            while (dial.second)
+            {
+                graphics.prepareScene(background);
+                if (isfacingdown)
+                {
+                    graphics.render(cha.x, cha.y, movedown);
+                }
+                else if (isfacingup)
+                {
+                    graphics.render(cha.x, cha.y, moveup);
+
+                }
+                else if (isfacingright)
+                {
+                    graphics.render(cha.x, cha.y, moveright);
+
+                }
+                else
+                {
+                    graphics.render(cha.x, cha.y, moveleft);
+                }
+                graphics.renderTexture(chadial, 36, 384);
+                graphics.renderTexture(keyshow, 205, 446);
+                graphics.renderTexture(keyshow2, 205, 466);
+                graphics.renderTexture(pressany, 205, 506);
+                graphics.presentScene();
+                waitUntilKeyPressed();
+                dial.second = 0;
+            }
         }
         if (inside(key.locx, key.locy, cha.rect)&&!key.obtained&&key.showing)
         {
@@ -2855,6 +2924,87 @@ int main(int argc, char* argv[])
         }
         //start of map2
         case 2:
+            while (dial.third)
+            {
+                graphics.prepareScene(background);
+                if (isfacingdown)
+                {
+                    graphics.render(cha.x, cha.y, movedown);
+                }
+                else if (isfacingup)
+                {
+                    graphics.render(cha.x, cha.y, moveup);
+
+                }
+                else if (isfacingright)
+                {
+                    graphics.render(cha.x, cha.y, moveright);
+
+                }
+                else
+                {
+                    graphics.render(cha.x, cha.y, moveleft);
+                }
+                graphics.renderTexture(chadial, 36, 384);
+                graphics.render(boss.x, boss.y, bossidle);
+                graphics.renderTexture(enter1, 205, 446);
+                graphics.renderTexture(pressany, 205, 506);
+                graphics.presentScene();
+                waitUntilKeyPressed();
+                graphics.prepareScene(background);
+                if (isfacingdown)
+                {
+                    graphics.render(cha.x, cha.y, movedown);
+                }
+                else if (isfacingup)
+                {
+                    graphics.render(cha.x, cha.y, moveup);
+
+                }
+                else if (isfacingright)
+                {
+                    graphics.render(cha.x, cha.y, moveright);
+
+                }
+                else
+                {
+                    graphics.render(cha.x, cha.y, moveleft);
+                }
+                graphics.renderTexture(bossdial, 36, 384);
+                graphics.render(boss.x, boss.y, bossidle);
+                graphics.renderTexture(boss1, 205, 446);
+                graphics.renderTexture(boss2, 205, 466);
+                graphics.renderTexture(pressany, 205, 506);
+                graphics.presentScene();
+                waitUntilKeyPressed();
+                graphics.prepareScene(background);
+                if (isfacingdown)
+                {
+                    graphics.render(cha.x, cha.y, movedown);
+                }
+                else if (isfacingup)
+                {
+                    graphics.render(cha.x, cha.y, moveup);
+
+                }
+                else if (isfacingright)
+                {
+                    graphics.render(cha.x, cha.y, moveright);
+
+                }
+                else
+                {
+                    graphics.render(cha.x, cha.y, moveleft);
+                }
+                graphics.renderTexture(chadial, 36, 384);
+                graphics.render(boss.x, boss.y, bossidle);
+                graphics.renderTexture(cha1, 205, 446);
+                graphics.renderTexture(pressany, 205, 506);
+                graphics.renderTexture(tips, 205, 526);
+                graphics.presentScene();
+                waitUntilKeyPressed();
+                dial.third = 0;
+            }
         {
             switch (event.type) {
             case SDL_QUIT:
@@ -2865,12 +3015,13 @@ int main(int argc, char* argv[])
                 if (event.key.keysym.scancode == SDL_SCANCODE_P)
                 {
                     pause = !pause;
+                   
                 }
                 if (!pause)
                 {
                     if (event.key.keysym.scancode == SDL_SCANCODE_T)
                     {
-                        cha.heartamount++;
+                        boss.heartamount -= 3;
                     }
                     if (event.key.keysym.scancode == SDL_SCANCODE_SPACE)
                     {
@@ -2879,6 +3030,10 @@ int main(int argc, char* argv[])
                         {
 
                             graphics.prepareScene(background);
+                            if (ms.showing)
+                            {
+                                graphics.renderTexture(msword,ms.x, ms.y);
+                            }
                             graphics.renderheart(heartless, heart, cha.heartamount, graphics);
                             if (isfacingup)
                             {
@@ -2897,54 +3052,63 @@ int main(int argc, char* argv[])
                             {
                                 graphics.render(cha.x, cha.y, moveright);
                             }
-                            if (boss.lookingright(cha))
+                            if (boss.isalive)
                             {
-                                graphics.render(boss.x, boss.y, bossidle);
+                                if (boss.lookingright(cha))
+                                {
+                                    graphics.render(boss.x, boss.y, bossidle);
+                                    bossidle.tick();
+
+                                }
+                                else
+                                {
+                                    graphics.render(boss.x, boss.y, bossidlel);
+                                    bossidlel.tick();
+                                }
                                 bossidle.tick();
 
+                                if (!boss.usingfireball)
+                                {
+                                    graphics.renderfire(firestate, graphics, vecfire, warning, burning, flimit);
+                                }
+                                else
+                                {
+                                    graphics.renderfireball(graphics, vecfireball, fireballstate, fireballleft, fireballright, fireballloc, i, warninglane);
+                                }
+                                graphics.renderTexture(bossheartt, bossh.x, bossh.y);
                             }
-                            else
-                            {
-                                graphics.render(boss.x, boss.y, bossidlel);
-                                bossidlel.tick();
-                            }
-                            bossidle.tick();
-                            if (!boss.usingfireball)
-                            {
-                                graphics.renderfire(firestate, graphics, vecfire, warning, burning, flimit);
-                            }
-                            else
-                            {
-                                graphics.renderfireball(graphics, vecfireball, fireballstate, fireballleft, fireballright, fireballloc, i, warninglane);
-                            }
-                            graphics.renderTexture(bossheart, bossh.x, bossh.y);
                             graphics.presentScene();
 
-                            SDL_Delay(100);
+                            SDL_Delay(50);
                         }
 
-                        if ((cha.isburnt(vecfire, firestate, flimit) && !boss.usingfireball) || (boss.usingfireball, cha.isfireballed(vecfireball, fireballstate)))
+                        if (boss.isalive)
                         {
-                            cha.heartamount--;
+                            if ((cha.isburnt(vecfire, firestate, flimit) && !boss.usingfireball) || (boss.usingfireball, cha.isfireballed(vecfireball, fireballstate)))
+                            {
+                                cha.heartamount--;
+                            }
                         }
-
-                        if (!boss.usingfireball)
+                        if (boss.isalive)
                         {
-                            firestate = (firestate + 1) % 4;
-                        }
-                        else
-                        {
-                            fireballstate = (fireballstate + 1) % 4;
-                        }
-                        if (firestate == 3)
-                        {
-                            boss.usingfireball = 1;
-                            firestate = (firestate + 1) % 4;
-                        }
-                        else if (fireballstate == 3)
-                        {
-                            boss.usingfireball = 0;
-                            fireballstate = (fireballstate + 1) % 4;
+                            if (!boss.usingfireball)
+                            {
+                                firestate = (firestate + 1) % 4;
+                            }
+                            else
+                            {
+                                fireballstate = (fireballstate + 1) % 4;
+                            }
+                            if (firestate == 3)
+                            {
+                                boss.usingfireball = 1;
+                                firestate = (firestate + 1) % 4;
+                            }
+                            else if (fireballstate == 3)
+                            {
+                                boss.usingfireball = 0;
+                                fireballstate = (fireballstate + 1) % 4;
+                            }
                         }
 
                     }
@@ -2956,24 +3120,44 @@ int main(int argc, char* argv[])
                             for (int i = 1;i <= 7;i++)
                             {
                                 graphics.prepareScene(background);
+                                if (ms.showing)
+                            {
+                                graphics.renderTexture(msword,ms.x, ms.y);
+                            }
                                 graphics.renderheart(heartless, heart, cha.heartamount, graphics);
+                                if(boss.isalive) graphics.renderTexture(bossheartt, bossh.x, bossh.y);
+
                                 graphics.render(cha.x, cha.y, slashright);
-                                graphics.renderfire(firestate, graphics, vecfire, warning, burning, flimit);
+
+                                if (boss.isalive)
+                                {
+                                    if (!boss.usingfireball)
+                                    {
+                                        graphics.renderfire(firestate, graphics, vecfire, warning, burning, flimit);
+                                    }
+                                    else
+                                    {
+                                        graphics.renderfireball(graphics, vecfireball, fireballstate, fireballleft, fireballright, fireballloc, i, warninglane);
+                                    }
+                                    
+                                }
                                 if (i <= 4)
                                 {
                                     slashright.tick();
                                 }
-
-                                if (boss.lookingright(cha))
+                                if (boss.isalive)
                                 {
-                                    graphics.render(boss.x, boss.y, bossidle);
-                                    bossidle.tick();
+                                    if (boss.lookingright(cha))
+                                    {
+                                        graphics.render(boss.x, boss.y, bossidle);
+                                        bossidle.tick();
 
-                                }
-                                else
-                                {
-                                    graphics.render(boss.x, boss.y, bossidlel);
-                                    bossidlel.tick();
+                                    }
+                                    else
+                                    {
+                                        graphics.render(boss.x, boss.y, bossidlel);
+                                        bossidlel.tick();
+                                    }
                                 }
                                 graphics.presentScene();
 
@@ -2985,20 +3169,14 @@ int main(int argc, char* argv[])
                         {
                             for (int i = 1;i <= 7;i++)
                             {
-                                if (slime1.heartamount <= 0 && slime1.isalive)
-                                {
-                                    slime1.canhurt = 0;
-                                }
-                                if (slime2.heartamount <= 0 && slime2.isalive)
-                                {
-                                    slime2.canhurt = 0;
-                                }
-                                if (slime3.heartamount <= 0 && slime3.isalive)
-                                {
-                                    slime3.canhurt = 0;
-                                }
+                                
                                 graphics.prepareScene(background);
+                                if (ms.showing)
+                                {
+                                    graphics.renderTexture(msword, ms.x, ms.y);
+                                }
                                 graphics.renderheart(heartless, heart, cha.heartamount, graphics);
+                                if(boss.isalive) graphics.renderTexture(bossheartt, bossh.x, bossh.y);
 
                                 if (slashleft.currentFrame != 1)
                                 {
@@ -3008,18 +3186,33 @@ int main(int argc, char* argv[])
                                 {
                                     graphics.render(cha.x - 30, cha.y, slashleft);
                                 }
-                                if (boss.lookingright(cha))
+                                if (boss.isalive)
                                 {
-                                    graphics.render(boss.x, boss.y, bossidle);
-                                    bossidle.tick();
+                                    if (boss.lookingright(cha))
+                                    {
+                                        graphics.render(boss.x, boss.y, bossidle);
+                                        bossidle.tick();
+
+                                    }
+                                    else
+                                    {
+                                        graphics.render(boss.x, boss.y, bossidlel);
+                                        bossidlel.tick();
+                                    }
+                                }
+
+                                if (boss.isalive)
+                                {
+                                    if (!boss.usingfireball)
+                                    {
+                                        graphics.renderfire(firestate, graphics, vecfire, warning, burning, flimit);
+                                    }
+                                    else
+                                    {
+                                        graphics.renderfireball(graphics, vecfireball, fireballstate, fireballleft, fireballright, fireballloc, i, warninglane);
+                                    }
 
                                 }
-                                else
-                                {
-                                    graphics.render(boss.x, boss.y, bossidlel);
-                                    bossidlel.tick();
-                                }
-                                graphics.renderfire(firestate, graphics, vecfire, warning, burning, flimit);
                                 if (i <= 4) slashleft.tick();
                                 graphics.presentScene();
 
@@ -3033,20 +3226,40 @@ int main(int argc, char* argv[])
                             for (int i = 1;i <= 7;i++)
                             {
                                 graphics.prepareScene(background);
-                                graphics.renderheart(heartless, heart, cha.heartamount, graphics);
-                                graphics.render(cha.x, cha.y, slashdown);
-                                if (boss.lookingright(cha))
+                                if (ms.showing)
                                 {
-                                    graphics.render(boss.x, boss.y, bossidle);
-                                    bossidle.tick();
+                                    graphics.renderTexture(msword, ms.x, ms.y);
+                                }
+                                graphics.renderheart(heartless, heart, cha.heartamount, graphics);
+                                if(boss.isalive) graphics.renderTexture(bossheartt, bossh.x, bossh.y);
+
+                                graphics.render(cha.x, cha.y, slashdown);
+                                if (boss.isalive)
+                                {
+                                    if (boss.lookingright(cha))
+                                    {
+                                        graphics.render(boss.x, boss.y, bossidle);
+                                        bossidle.tick();
+
+                                    }
+                                    else
+                                    {
+                                        graphics.render(boss.x, boss.y, bossidlel);
+                                        bossidlel.tick();
+                                    }
+                                }
+                                if (boss.isalive)
+                                {
+                                    if (!boss.usingfireball)
+                                    {
+                                        graphics.renderfire(firestate, graphics, vecfire, warning, burning, flimit);
+                                    }
+                                    else
+                                    {
+                                        graphics.renderfireball(graphics, vecfireball, fireballstate, fireballleft, fireballright, fireballloc, i, warninglane);
+                                    }
 
                                 }
-                                else
-                                {
-                                    graphics.render(boss.x, boss.y, bossidlel);
-                                    bossidlel.tick();
-                                }
-                                graphics.renderfire(firestate, graphics, vecfire, warning, burning, flimit);
                                 if (i <= 4) slashdown.tick();
                                 graphics.presentScene();
 
@@ -3058,20 +3271,40 @@ int main(int argc, char* argv[])
                             for (int i = 1;i <= 7;i++)
                             {
                                 graphics.prepareScene(background);
-                                graphics.renderheart(heartless, heart, cha.heartamount, graphics);
-                                graphics.render(cha.x, cha.y, slashup);
-                                if (boss.lookingright(cha))
+                                if (ms.showing)
                                 {
-                                    graphics.render(boss.x, boss.y, bossidle);
-                                    bossidle.tick();
+                                    graphics.renderTexture(msword, ms.x, ms.y);
+                                }
+                                graphics.renderheart(heartless, heart, cha.heartamount, graphics);
+                                if(boss.isalive) graphics.renderTexture(bossheartt, bossh.x, bossh.y);
+
+                                graphics.render(cha.x, cha.y, slashup);
+                                if (boss.isalive)
+                                {
+                                    if (boss.lookingright(cha))
+                                    {
+                                        graphics.render(boss.x, boss.y, bossidle);
+                                        bossidle.tick();
+
+                                    }
+                                    else
+                                    {
+                                        graphics.render(boss.x, boss.y, bossidlel);
+                                        bossidlel.tick();
+                                    }
+                                }
+                                if (boss.isalive)
+                                {
+                                    if (!boss.usingfireball)
+                                    {
+                                        graphics.renderfire(firestate, graphics, vecfire, warning, burning, flimit);
+                                    }
+                                    else
+                                    {
+                                        graphics.renderfireball(graphics, vecfireball, fireballstate, fireballleft, fireballright, fireballloc, i, warninglane);
+                                    }
 
                                 }
-                                else
-                                {
-                                    graphics.render(boss.x, boss.y, bossidlel);
-                                    bossidlel.tick();
-                                }
-                                graphics.renderfire(firestate, graphics, vecfire, warning, burning, flimit);
 
                                 if (i <= 4)  slashup.tick();
 
@@ -3085,30 +3318,38 @@ int main(int argc, char* argv[])
                         {
                             cha.heartamount--;
                         }
-                        if (!boss.usingfireball)
+                        if (boss.isalive)
                         {
-                            firestate = (firestate + 1) % 4;
+                            if (!boss.usingfireball)
+                            {
+                                firestate = (firestate + 1) % 4;
+                            }
+                            else
+                            {
+                                fireballstate = (fireballstate + 1) % 4;
+                            }
+                            if (firestate == 3)
+                            {
+                                boss.usingfireball = 1;
+                                firestate = (firestate + 1) % 4;
+                            }
+                            else if (fireballstate == 3)
+                            {
+                                boss.usingfireball = 0;
+                                fireballstate = (fireballstate + 1) % 4;
+                            }
                         }
-                        else
+                        if (cha.hitheart(bossh, isfacingright, isfacingleft, isfacingup, isfacingdown))
                         {
-                            fireballstate = (fireballstate + 1) % 4;
+                            boss.heartamount--;
                         }
-                        if (firestate == 3)
-                        {
-                            boss.usingfireball = 1;
-                            firestate = (firestate + 1) % 4;
-                        }
-                        else if (fireballstate == 3)
-                        {
-                            boss.usingfireball = 0;
-                            fireballstate = (fireballstate + 1) % 4;
-                        }
+ 
                     }
                     if (event.key.keysym.scancode == SDL_SCANCODE_X)
                     {
                         if (isfacingright)
                         {
-                            if (cha.notborderjump('r')&&cha.notbossloc(1,'r'))
+                            if (cha.notborderjump('r')&&cha.notbossloc(1,'r',ms.showing) && cha.notheartloc(1, 'r',bossh))
                             {
                                 idling = 0;
 
@@ -3116,7 +3357,13 @@ int main(int argc, char* argv[])
                                 {
                                     cha.turnEast();
                                     graphics.prepareScene(background);
+                                    if (ms.showing)
+                                    {
+                                        graphics.renderTexture(msword, ms.x, ms.y);
+                                    }
                                     graphics.renderheart(heartless, heart, cha.heartamount, graphics);
+                                   if(boss.isalive) graphics.renderTexture(bossheartt, bossh.x, bossh.y);
+
                                     cha.move();
                                     if (i <= 7)
                                     {
@@ -3126,24 +3373,28 @@ int main(int argc, char* argv[])
                                     {
                                         graphics.render(cha.x, cha.y - (14 - i) * 4, moveright);
                                     }
-                                    if (boss.lookingright(cha))
+                                    if (boss.isalive)
                                     {
-                                        graphics.render(boss.x, boss.y, bossidle);
-                                        bossidle.tick();
+                                        if (boss.lookingright(cha))
+                                        {
+                                            graphics.render(boss.x, boss.y, bossidle);
+                                            bossidle.tick();
 
-                                    }
-                                    else
-                                    {
-                                        graphics.render(boss.x, boss.y, bossidlel);
-                                        bossidlel.tick();
-                                    }
-                                    if (!boss.usingfireball)
-                                    {
-                                        graphics.renderfire(firestate, graphics, vecfire, warning, burning, flimit);
-                                    }
-                                    else
-                                    {
-                                        graphics.renderfireball(graphics, vecfireball, fireballstate, fireballleft, fireballright, fireballloc, i, warninglane);
+                                        }
+                                        else
+                                        {
+                                            graphics.render(boss.x, boss.y, bossidlel);
+                                            bossidlel.tick();
+                                        }
+
+                                        if (!boss.usingfireball)
+                                        {
+                                            graphics.renderfire(firestate, graphics, vecfire, warning, burning, flimit);
+                                        }
+                                        else
+                                        {
+                                            graphics.renderfireball(graphics, vecfireball, fireballstate, fireballleft, fireballright, fireballloc, i, warninglane);
+                                        }
                                     }
                                     moveright.tick();
                                     graphics.presentScene();
@@ -3161,7 +3412,7 @@ int main(int argc, char* argv[])
                         }
                         else if (isfacingup)
                         {
-                            if (cha.notborderjump('u') && cha.notbossloc(1,'u'))
+                            if (cha.notborderjump('u') && cha.notbossloc(1,'u',ms.showing) && cha.notheartloc(1, 'u', bossh))
                             {
                                 idling = 0;
                                 for (int i = 1;i <= 14;i++)
@@ -3169,7 +3420,13 @@ int main(int argc, char* argv[])
 
                                     cha.turnNorth();
                                     graphics.prepareScene(background);
+                                    if (ms.showing)
+                                    {
+                                        graphics.renderTexture(msword, ms.x, ms.y);
+                                    }
                                     graphics.renderheart(heartless, heart, cha.heartamount, graphics);
+                                    if (boss.isalive) graphics.renderTexture(bossheartt, bossh.x, bossh.y);
+
                                     cha.move();
                                     if (i <= 7)
                                     {
@@ -3179,24 +3436,27 @@ int main(int argc, char* argv[])
                                     {
                                         graphics.render(cha.x, cha.y - (14 - i) * 4, moveup);
                                     }
-                                    if (boss.lookingright(cha))
+                                    if (boss.isalive)
                                     {
-                                        graphics.render(boss.x, boss.y, bossidle);
-                                        bossidle.tick();
+                                        if (boss.lookingright(cha))
+                                        {
+                                            graphics.render(boss.x, boss.y, bossidle);
+                                            bossidle.tick();
 
-                                    }
-                                    else
-                                    {
-                                        graphics.render(boss.x, boss.y, bossidlel);
-                                        bossidlel.tick();
-                                    }
-                                    if (!boss.usingfireball)
-                                    {
-                                        graphics.renderfire(firestate, graphics, vecfire, warning, burning, flimit);
-                                    }
-                                    else
-                                    {
-                                        graphics.renderfireball(graphics, vecfireball, fireballstate, fireballleft, fireballright, fireballloc, i, warninglane);
+                                        }
+                                        else
+                                        {
+                                            graphics.render(boss.x, boss.y, bossidlel);
+                                            bossidlel.tick();
+                                        }
+                                        if (!boss.usingfireball)
+                                        {
+                                            graphics.renderfire(firestate, graphics, vecfire, warning, burning, flimit);
+                                        }
+                                        else
+                                        {
+                                            graphics.renderfireball(graphics, vecfireball, fireballstate, fireballleft, fireballright, fireballloc, i, warninglane);
+                                        }
                                     }
                                     moveup.tick();
                                     graphics.presentScene();
@@ -3212,7 +3472,7 @@ int main(int argc, char* argv[])
                         }
                         else if (isfacingdown)
                         {
-                            if (cha.notborderjump('d') && cha.notbossloc(1,'d'))
+                            if (cha.notborderjump('d') && cha.notbossloc(1,'d',ms.showing) && cha.notheartloc(1, 'd', bossh))
                             {
                                 idling = 0;
 
@@ -3220,7 +3480,12 @@ int main(int argc, char* argv[])
                                 {
                                     cha.turnSouth();
                                     graphics.prepareScene(background);
+                                    if (ms.showing)
+                                    {
+                                        graphics.renderTexture(msword, ms.x, ms.y);
+                                    }
                                     graphics.renderheart(heartless, heart, cha.heartamount, graphics);
+                                    if (boss.isalive)  graphics.renderTexture(bossheartt, bossh.x, bossh.y);
 
                                     cha.move();
                                     if (i <= 7)
@@ -3231,24 +3496,27 @@ int main(int argc, char* argv[])
                                     {
                                         graphics.render(cha.x, cha.y - (14 - i) * 4, movedown);
                                     }
-                                    if (boss.lookingright(cha))
+                                    if (boss.isalive)
                                     {
-                                        graphics.render(boss.x, boss.y, bossidle);
-                                        bossidle.tick();
+                                        if (boss.lookingright(cha))
+                                        {
+                                            graphics.render(boss.x, boss.y, bossidle);
+                                            bossidle.tick();
 
-                                    }
-                                    else
-                                    {
-                                        graphics.render(boss.x, boss.y, bossidlel);
-                                        bossidlel.tick();
-                                    }
-                                    if (!boss.usingfireball)
-                                    {
-                                        graphics.renderfire(firestate, graphics, vecfire, warning, burning, flimit);
-                                    }
-                                    else
-                                    {
-                                        graphics.renderfireball(graphics, vecfireball, fireballstate, fireballleft, fireballright, fireballloc, i, warninglane);
+                                        }
+                                        else
+                                        {
+                                            graphics.render(boss.x, boss.y, bossidlel);
+                                            bossidlel.tick();
+                                        }
+                                        if (!boss.usingfireball)
+                                        {
+                                            graphics.renderfire(firestate, graphics, vecfire, warning, burning, flimit);
+                                        }
+                                        else
+                                        {
+                                            graphics.renderfireball(graphics, vecfireball, fireballstate, fireballleft, fireballright, fireballloc, i, warninglane);
+                                        }
                                     }
                                     movedown.tick();
                                     graphics.presentScene();
@@ -3266,14 +3534,20 @@ int main(int argc, char* argv[])
                         }
                         else if (isfacingleft)
                         {
-                            if (cha.notborderjump('l') && cha.notbossloc(1,'l'))
+                            if (cha.notborderjump('l') && cha.notbossloc(1,'l',ms.showing) && cha.notheartloc(1, 'l', bossh))
                             {
                                 idling = 0;
 
                                 for (int i = 1;i <= 14;i++)
                                 {
                                     graphics.prepareScene(background);
+                                    if (ms.showing)
+                                    {
+                                        graphics.renderTexture(msword, ms.x, ms.y);
+                                    }
                                     graphics.renderheart(heartless, heart, cha.heartamount, graphics);
+                                    if (boss.isalive)  graphics.renderTexture(bossheartt, bossh.x, bossh.y);
+
                                     cha.turnWest();
                                     cha.move();
                                     if (i <= 7)
@@ -3284,6 +3558,98 @@ int main(int argc, char* argv[])
                                     {
                                         graphics.render(cha.x, cha.y - (14 - i) * 4, moveleft);
                                     }
+                                    if (boss.isalive)
+                                    {
+                                        if (boss.lookingright(cha))
+                                        {
+                                            graphics.render(boss.x, boss.y, bossidle);
+                                            bossidle.tick();
+
+                                        }
+                                        else
+                                        {
+                                            graphics.render(boss.x, boss.y, bossidlel);
+                                            bossidlel.tick();
+                                        }
+                                        if (!boss.usingfireball)
+                                        {
+                                            graphics.renderfire(firestate, graphics, vecfire, warning, burning, flimit);
+                                        }
+                                        else
+                                        {
+                                            graphics.renderfireball(graphics, vecfireball, fireballstate, fireballleft, fireballright, fireballloc, i, warninglane);
+                                        }
+                                    }
+                                    moveleft.tick();
+                                    graphics.presentScene();
+
+                                    SDL_Delay(35);
+                                }
+                                idling = true;
+                                isfacingleft = true;
+                                isfacingdown = false;
+                                isfacingup = false;
+                                isfacingright = false;
+                            }
+                        }
+                        if (boss.isalive)
+                        {
+                            if ((cha.isburnt(vecfire, firestate, flimit) && !boss.usingfireball) || (boss.usingfireball, cha.isfireballed(vecfireball, fireballstate)))
+                            {
+                                cha.heartamount--;
+                            }
+                        }
+                        if (boss.isalive)
+                        {
+                            if (cha.moved)
+                            {
+                                if (!boss.usingfireball)
+                                {
+                                    firestate = (firestate + 1) % 4;
+                                }
+                                else
+                                {
+                                    fireballstate = (fireballstate + 1) % 4;
+                                }
+                            }
+                        }
+                        if (boss.isalive)
+                        {
+                            if (firestate == 3)
+                            {
+                                boss.usingfireball = 1;
+                                firestate = (firestate + 1) % 4;
+                            }
+                            else if (fireballstate == 3)
+                            {
+                                boss.usingfireball = 0;
+                                fireballstate = (fireballstate + 1) % 4;
+                            }
+                        }
+
+
+                    }
+                    if (event.key.keysym.scancode == SDL_SCANCODE_UP)
+                    {
+                        if (cha.notborder('u') && cha.notbossloc( 0,'u',ms.showing) && cha.notheartloc(0, 'u', bossh))
+                        {
+                            idling = 0;
+                            for (int i = 1;i <= 7;i++)
+                            {
+
+                                cha.turnNorth();
+                                graphics.prepareScene(background);
+                                if (ms.showing)
+                                {
+                                    graphics.renderTexture(msword, ms.x, ms.y);
+                                }
+                                graphics.renderheart(heartless, heart, cha.heartamount, graphics);
+                                if (boss.isalive)graphics.renderTexture(bossheartt, bossh.x, bossh.y);
+
+                                cha.move();
+                                graphics.render(cha.x, cha.y, moveup);
+                                if (boss.isalive)
+                                {
                                     if (boss.lookingright(cha))
                                     {
                                         graphics.render(boss.x, boss.y, bossidle);
@@ -3303,79 +3669,6 @@ int main(int argc, char* argv[])
                                     {
                                         graphics.renderfireball(graphics, vecfireball, fireballstate, fireballleft, fireballright, fireballloc, i, warninglane);
                                     }
-                                    moveleft.tick();
-                                    graphics.presentScene();
-
-                                    SDL_Delay(35);
-                                }
-                                idling = true;
-                                isfacingleft = true;
-                                isfacingdown = false;
-                                isfacingup = false;
-                                isfacingright = false;
-                            }
-                        }
-                        if ((cha.isburnt(vecfire, firestate, flimit) && !boss.usingfireball) || (boss.usingfireball, cha.isfireballed(vecfireball, fireballstate)))
-                        {
-                            cha.heartamount--;
-                        }
-                        if (cha.moved)
-                        {
-                            if (!boss.usingfireball)
-                            {
-                                firestate = (firestate + 1) % 4;
-                            }
-                            else
-                            {
-                                fireballstate = (fireballstate + 1) % 4;
-                            }
-                        }
-                        if (firestate == 3)
-                        {
-                            boss.usingfireball = 1;
-                            firestate = (firestate + 1) % 4;
-                        }
-                        else if (fireballstate == 3)
-                        {
-                            boss.usingfireball = 0;
-                            fireballstate = (fireballstate + 1) % 4;
-                        }
-
-
-
-                    }
-                    if (event.key.keysym.scancode == SDL_SCANCODE_UP)
-                    {
-                        if (cha.notborder('u') && cha.notbossloc( 0,'u'))
-                        {
-                            idling = 0;
-                            for (int i = 1;i <= 7;i++)
-                            {
-
-                                cha.turnNorth();
-                                graphics.prepareScene(background);
-                                graphics.renderheart(heartless, heart, cha.heartamount, graphics);
-
-                                cha.move();
-                                graphics.render(cha.x, cha.y, moveup);
-                                if (boss.lookingright(cha))
-                                {
-                                    graphics.render(boss.x, boss.y, bossidle);
-                                    bossidle.tick();
-
-                                }
-                                else
-                                {
-                                    graphics.render(boss.x, boss.y, bossidlel);
-                                    bossidlel.tick();
-                                }
-                                if (!boss.usingfireball)
-                                {
-                                    graphics.renderfire(firestate, graphics, vecfire, warning, burning, flimit);
-                                }
-                                else
-                                {
-                                    graphics.renderfireball(graphics, vecfireball, fireballstate, fireballleft, fireballright, fireballloc, i, warninglane);
                                 }
                                 moveup.tick();
                                 graphics.presentScene();
@@ -3390,66 +3683,76 @@ int main(int argc, char* argv[])
                             isfacingdown = false;
 
                         }
-                        if ((cha.isburnt(vecfire, firestate, flimit) && !boss.usingfireball) || (boss.usingfireball, cha.isfireballed(vecfireball, fireballstate)))
+                        if (boss.isalive)
                         {
-                            cha.heartamount--;
-                        }
-                        if (cha.moved)
-                        {
-                            if (!boss.usingfireball)
+                            if ((cha.isburnt(vecfire, firestate, flimit) && !boss.usingfireball) || (boss.usingfireball, cha.isfireballed(vecfireball, fireballstate)))
                             {
+                                cha.heartamount--;
+                            }
+                            if (cha.moved)
+                            {
+                                if (!boss.usingfireball)
+                                {
+                                    firestate = (firestate + 1) % 4;
+                                }
+                                else
+                                {
+                                    fireballstate = (fireballstate + 1) % 4;
+                                }
+                            }
+                            if (firestate == 3)
+                            {
+                                boss.usingfireball = 1;
                                 firestate = (firestate + 1) % 4;
                             }
-                            else
+                            else if (fireballstate == 3)
                             {
+                                boss.usingfireball = 0;
                                 fireballstate = (fireballstate + 1) % 4;
                             }
                         }
-                        if (firestate == 3)
-                        {
-                            boss.usingfireball = 1;
-                            firestate = (firestate + 1) % 4;
-                        }
-                        else if (fireballstate == 3)
-                        {
-                            boss.usingfireball = 0;
-                            fireballstate = (fireballstate + 1) % 4;
-                        }
-
                     }
                     if (event.key.keysym.scancode == SDL_SCANCODE_LEFT)
-
                     {
-                        if (cha.notborder('l') && cha.notbossloc(0,'l'))
+                        if (cha.notborder('l') && cha.notbossloc(0,'l',ms.showing) && cha.notheartloc(0, 'l', bossh))
                         {
                             idling = 0;
                             bool collided = false;
                             for (int i = 1;i <= 7;i++)
                             {
                                 graphics.prepareScene(background);
+                                if (ms.showing)
+                                {
+                                    graphics.renderTexture(msword, ms.x, ms.y);
+                                }
                                 graphics.renderheart(heartless, heart, cha.heartamount, graphics);
+                                if (boss.isalive)   graphics.renderTexture(bossheartt, bossh.x, bossh.y);
+
                                 cha.turnWest();
 
                                 cha.move();
                                 graphics.render(cha.x, cha.y, moveleft);
-                                if (boss.lookingright(cha))
+                                if (boss.isalive)
                                 {
-                                    graphics.render(boss.x, boss.y, bossidle);
-                                    bossidle.tick();
+                                    if (boss.lookingright(cha))
+                                    {
+                                        graphics.render(boss.x, boss.y, bossidle);
+                                        bossidle.tick();
 
-                                }
-                                else
-                                {
-                                    graphics.render(boss.x, boss.y, bossidlel);
-                                    bossidlel.tick();
-                                }
-                                if (!boss.usingfireball)
-                                {
-                                    graphics.renderfire(firestate, graphics, vecfire, warning, burning, flimit);
-                                }
-                                else
-                                {
-                                    graphics.renderfireball(graphics, vecfireball, fireballstate, fireballleft, fireballright, fireballloc, i, warninglane);
+                                    }
+                                    else
+                                    {
+                                        graphics.render(boss.x, boss.y, bossidlel);
+                                        bossidlel.tick();
+                                    }
+                                    if (!boss.usingfireball)
+                                    {
+                                        graphics.renderfire(firestate, graphics, vecfire, warning, burning, flimit);
+                                    }
+                                    else
+                                    {
+                                        graphics.renderfireball(graphics, vecfireball, fireballstate, fireballleft, fireballright, fireballloc, i, warninglane);
+                                    }
                                 }
                                 moveleft.tick();
                                 graphics.presentScene();
@@ -3464,65 +3767,78 @@ int main(int argc, char* argv[])
                             isfacingup = false;
                             isfacingright = false;
                         }
-                        if ((cha.isburnt(vecfire, firestate, flimit) && !boss.usingfireball) || (boss.usingfireball, cha.isfireballed(vecfireball, fireballstate)))
+                        if (boss.isalive)
                         {
-                            cha.heartamount--;
-                        }
-                        if (cha.moved)
-                        {
-                            if (!boss.usingfireball)
+                            if ((cha.isburnt(vecfire, firestate, flimit) && !boss.usingfireball) || (boss.usingfireball, cha.isfireballed(vecfireball, fireballstate)))
                             {
+                                cha.heartamount--;
+                            }
+                            if (cha.moved)
+                            {
+                                if (!boss.usingfireball)
+                                {
+                                    firestate = (firestate + 1) % 4;
+                                }
+                                else
+                                {
+                                    fireballstate = (fireballstate + 1) % 4;
+                                }
+                            }
+                            if (firestate == 3)
+                            {
+                                boss.usingfireball = 1;
                                 firestate = (firestate + 1) % 4;
                             }
-                            else
+                            else if (fireballstate == 3)
                             {
+                                boss.usingfireball = 0;
                                 fireballstate = (fireballstate + 1) % 4;
                             }
-                        }
-                        if (firestate == 3)
-                        {
-                            boss.usingfireball = 1;
-                            firestate = (firestate + 1) % 4;
-                        }
-                        else if (fireballstate == 3)
-                        {
-                            boss.usingfireball = 0;
-                            fireballstate = (fireballstate + 1) % 4;
                         }
 
                     }
                     if (event.key.keysym.scancode == SDL_SCANCODE_RIGHT)
                     {
-                        if (cha.notborder('r') && cha.notbossloc(0,'r'))
+                        if (cha.notborder('r') && cha.notbossloc(0,'r',ms.showing) && cha.notheartloc(0, 'r', bossh))
                         {
                             bool collided = false;
                             idling = 0;
-                            graphics.renderheart(heartless, heart, cha.heartamount, graphics);
+
                             for (int i = 1;i <= 7;i++)
                             {
                                 cha.turnEast();
                                 graphics.prepareScene(background);
+                                if (ms.showing)
+                                {
+                                    graphics.renderTexture(msword, ms.x, ms.y);
+                                }
                                 graphics.renderheart(heartless, heart, cha.heartamount, graphics);
+                                if (boss.isalive)   graphics.renderTexture(bossheartt, bossh.x, bossh.y);
+
                                 cha.move();
                                 graphics.render(cha.x, cha.y, moveright);
-                                if (boss.lookingright(cha))
+                                if (boss.isalive)
                                 {
-                                    graphics.render(boss.x, boss.y, bossidle);
-                                    bossidle.tick();
+                                    if (boss.lookingright(cha))
+                                    {
+                                        graphics.render(boss.x, boss.y, bossidle);
+                                        bossidle.tick();
 
-                                }
-                                else
-                                {
-                                    graphics.render(boss.x, boss.y, bossidlel);
-                                    bossidlel.tick();
-                                }
-                                if (!boss.usingfireball)
-                                {
-                                    graphics.renderfire(firestate, graphics, vecfire, warning, burning, flimit);
-                                }
-                                else
-                                {
-                                    graphics.renderfireball(graphics, vecfireball, fireballstate, fireballleft, fireballright, fireballloc, i, warninglane);
+                                    }
+                                    else
+                                    {
+                                        graphics.render(boss.x, boss.y, bossidlel);
+                                        bossidlel.tick();
+                                    }
+
+                                    if (!boss.usingfireball)
+                                    {
+                                        graphics.renderfire(firestate, graphics, vecfire, warning, burning, flimit);
+                                    }
+                                    else
+                                    {
+                                        graphics.renderfireball(graphics, vecfireball, fireballstate, fireballleft, fireballright, fireballloc, i, warninglane);
+                                    }
                                 }
                                 moveright.tick();
                                 graphics.presentScene();
@@ -3535,36 +3851,39 @@ int main(int argc, char* argv[])
                             isfacingdown = false;
                             isfacingleft = false;
                         }
-                        if ((cha.isburnt(vecfire, firestate, flimit) && !boss.usingfireball) || (boss.usingfireball, cha.isfireballed(vecfireball, fireballstate)))
+                        if (boss.isalive)
                         {
-                            cha.heartamount--;
-                        }
-                        if (cha.moved)
-                        {
-                            if (!boss.usingfireball)
+                            if ((cha.isburnt(vecfire, firestate, flimit) && !boss.usingfireball) || (boss.usingfireball, cha.isfireballed(vecfireball, fireballstate)))
                             {
+                                cha.heartamount--;
+                            }
+                            if (cha.moved)
+                            {
+                                if (!boss.usingfireball)
+                                {
+                                    firestate = (firestate + 1) % 4;
+                                }
+                                else
+                                {
+                                    fireballstate = (fireballstate + 1) % 4;
+                                }
+                            }
+                            if (firestate == 3)
+                            {
+                                boss.usingfireball = 1;
                                 firestate = (firestate + 1) % 4;
                             }
-                            else
+                            else if (fireballstate == 3)
                             {
+                                boss.usingfireball = 0;
                                 fireballstate = (fireballstate + 1) % 4;
                             }
-                        }
-                        if (firestate == 3)
-                        {
-                            boss.usingfireball = 1;
-                            firestate = (firestate + 1) % 4;
-                        }
-                        else if (fireballstate == 3)
-                        {
-                            boss.usingfireball = 0;
-                            fireballstate = (fireballstate + 1) % 4;
                         }
 
                     }
                     if (event.key.keysym.scancode == SDL_SCANCODE_DOWN)
                     {
-                        if (cha.notborder('d') && cha.notbossloc(0,'d'))
+                        if (cha.notborder('d') && cha.notbossloc(0,'d',ms.showing) && cha.notheartloc(0, 'd', bossh))
                         {
                             idling = 0;
 
@@ -3572,28 +3891,38 @@ int main(int argc, char* argv[])
                             {
                                 cha.turnSouth();
                                 graphics.prepareScene(background);
-                                graphics.renderheart(heartless, heart, cha.heartamount, graphics);
-                                cha.move();
-                                if (boss.lookingright(cha))
+                                if (ms.showing)
                                 {
-                                    graphics.render(boss.x, boss.y, bossidle);
-                                    bossidle.tick();
-
+                                    graphics.renderTexture(msword, ms.x, ms.y);
                                 }
-                                else
+                                graphics.renderheart(heartless, heart, cha.heartamount, graphics);
+                                if (boss.isalive)graphics.renderTexture(bossheartt, bossh.x, bossh.y);
+
+                                cha.move();
+                                if (boss.isalive)
                                 {
-                                    graphics.render(boss.x, boss.y, bossidlel);
-                                    bossidlel.tick();
+                                    if (boss.lookingright(cha))
+                                    {
+                                        graphics.render(boss.x, boss.y, bossidle);
+                                        bossidle.tick();
+
+                                    }
+                                    else
+                                    {
+                                        graphics.render(boss.x, boss.y, bossidlel);
+                                        bossidlel.tick();
+                                    }
+                                    if (!boss.usingfireball)
+                                    {
+                                        graphics.renderfire(firestate, graphics, vecfire, warning, burning, flimit);
+                                    }
+                                    else
+                                    {
+                                        graphics.renderfireball(graphics, vecfireball, fireballstate, fireballleft, fireballright, fireballloc, i, warninglane);
+                                    }
                                 }
                                 graphics.render(cha.x, cha.y, movedown);
-                                if (!boss.usingfireball)
-                                {
-                                    graphics.renderfire(firestate, graphics, vecfire, warning, burning, flimit);
-                                }
-                                else
-                                {
-                                    graphics.renderfireball(graphics, vecfireball, fireballstate, fireballleft, fireballright, fireballloc, i, warninglane);
-                                }
+
                                 movedown.tick();
 
                                 graphics.presentScene();
@@ -3612,26 +3941,29 @@ int main(int argc, char* argv[])
                         {
                             cha.heartamount--;
                         }
-                        if (cha.moved)
+                        if (boss.isalive)
                         {
-                            if (!boss.usingfireball)
+                            if (cha.moved)
                             {
+                                if (!boss.usingfireball)
+                                {
+                                    firestate = (firestate + 1) % 4;
+                                }
+                                else
+                                {
+                                    fireballstate = (fireballstate + 1) % 4;
+                                }
+                            }
+                            if (firestate == 3)
+                            {
+                                boss.usingfireball = 1;
                                 firestate = (firestate + 1) % 4;
                             }
-                            else
+                            else if (fireballstate == 3)
                             {
+                                boss.usingfireball = 0;
                                 fireballstate = (fireballstate + 1) % 4;
                             }
-                        }
-                        if (firestate == 3)
-                        {
-                            boss.usingfireball = 1;
-                            firestate = (firestate + 1) % 4;
-                        }
-                        else if (fireballstate == 3)
-                        {
-                            boss.usingfireball = 0;
-                            fireballstate = (fireballstate + 1) % 4;
                         }
 
                     }
@@ -3646,15 +3978,23 @@ int main(int argc, char* argv[])
             {
                 cha.moved = 0;
                 graphics.prepareScene(background);
-               
-
-                if (!boss.usingfireball)
+                if (ms.showing)
                 {
-                    graphics.renderfire(firestate, graphics, vecfire, warning, burning, flimit);
+                    graphics.renderTexture(msword, ms.x, ms.y);
                 }
-                else if(fireballstate!=2)
+                if (boss.isalive)
+                    graphics.renderTexture(bossheartt, bossh.x, bossh.y);
+
+                if (boss.isalive)
                 {
-                    graphics.renderfireball(graphics, vecfireball, fireballstate, fireballleft, fireballright, fireballloc, 0, warninglane);
+                    if (!boss.usingfireball)
+                    {
+                        graphics.renderfire(firestate, graphics, vecfire, warning, burning, flimit);
+                    }
+                    else if (fireballstate != 2)
+                    {
+                        graphics.renderfireball(graphics, vecfireball, fireballstate, fireballleft, fireballright, fireballloc, 0, warninglane);
+                    }
                 }
                 if (isfacingup)
                 {
@@ -3682,16 +4022,19 @@ int main(int argc, char* argv[])
                     if (!pause) idle.tick();
 
                 }
-                if (boss.lookingright(cha))
+                if (boss.isalive)
                 {
-                    graphics.render(boss.x, boss.y, bossidle);
-                    if (!pause)  bossidle.tick();
+                    if (boss.lookingright(cha))
+                    {
+                        graphics.render(boss.x, boss.y, bossidle);
+                        if (!pause)  bossidle.tick();
 
-                }
-                else
-                {
-                    graphics.render(boss.x, boss.y, bossidlel);
-                    if (!pause)  bossidlel.tick();
+                    }
+                    else
+                    {
+                        graphics.render(boss.x, boss.y, bossidlel);
+                        if (!pause)  bossidlel.tick();
+                    }
                 }
                 graphics.renderheart(heartless, heart, cha.heartamount, graphics);
                 if (pause)
@@ -3770,6 +4113,7 @@ int main(int argc, char* argv[])
                 for (int i = 1;i <= 3;i++)
                 {
                     graphics.prepareScene(background);
+
                     graphics.renderheart(heartless, heart, cha.heartamount, graphics);
                     graphics.render(cha.x, cha.y + 10, chadeath);
                     chadeath.tick();
@@ -3780,6 +4124,43 @@ int main(int argc, char* argv[])
                 }
                 changedmap = true;
                 currentmap = 3;
+            }
+            if (boss.heartamount <= 0 && boss.isalive)
+            {
+                for (int i = 1;i <= 5;i++)
+                {
+                    graphics.prepareScene(background);
+                    switch (i)
+                    {
+            case 1:
+                graphics.render(boss.x-10, boss.y, bossdeath);
+                break;
+            case 2:
+                graphics.render(368, 156, bossdeath);
+                break;
+            case 3:
+                graphics.render(367, 195, bossdeath);
+                break;
+            case 4:
+                graphics.render(358, 258, bossdeath);
+                break;
+            case 5:
+                graphics.render(363,299 , bossdeath);
+                break;
+     
+             
+                }
+                    bossdeath.tick();
+                    graphics.presentScene();
+
+                    SDL_Delay(500);
+                }
+                boss.isalive = 0;
+                ms.showing = true;
+            }
+            if (inside(ms.locx, ms.locy, cha.getrect()))
+            {
+                pause = true;
             }
             break;
             case 3:

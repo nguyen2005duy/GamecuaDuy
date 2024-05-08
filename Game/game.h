@@ -27,6 +27,13 @@ struct point
     int x;
     int y;
 };
+struct dialogue
+{
+    bool first=1;
+    bool second=1;
+    bool third=1;
+
+};
 const char* KEYIMAGE = "img//key.png";
 struct fire
 {
@@ -361,7 +368,7 @@ struct Cha {
     {
         return rect;
     }
-    bool notbossloc( bool jump,char direction)
+    bool notbossloc( bool jump,char direction,bool showing)
     {
         SDL_Rect boss;
         if (direction=='r' && jump)
@@ -420,7 +427,102 @@ struct Cha {
             boss.w = rect.w;
             boss.h = rect.h;
         }
-        return !inside(399, 303, boss);
+        return !inside(399, 303, boss)||showing;
+    }
+    bool notheartloc(bool jump, char direction,bossheart bossh)
+    {
+        SDL_Rect boss;
+        if (direction == 'r' && jump)
+        {
+            boss.x = rect.x + rect.w * 2;
+            boss.y = rect.y;
+            boss.w = rect.w;
+            boss.h = rect.h;
+        }
+        else if (direction == 'l' && jump)
+        {
+            boss.x = rect.x - rect.w * 2;
+            boss.y = rect.y;
+            boss.w = rect.w;
+            boss.h = rect.h;
+        }
+        else if (direction == 'u' && jump)
+        {
+            boss.x = rect.x;
+            boss.y = rect.y - rect.h * 2;
+            boss.w = rect.w;
+            boss.h = rect.h;
+        }
+        else if (direction == 'd' && jump)
+        {
+            boss.x = rect.x;
+            boss.y = rect.y + rect.h * 2;
+            boss.w = rect.w;
+            boss.h = rect.h;
+        }
+        else if (direction == 'r' && !jump)
+        {
+            boss.x = rect.x + rect.w;
+            boss.y = rect.y;
+            boss.w = rect.w;
+            boss.h = rect.h;
+        }
+        else if (direction == 'l' && !jump)
+        {
+            boss.x = rect.x - rect.w;
+            boss.y = rect.y;
+            boss.w = rect.w;
+            boss.h = rect.h;
+        }
+        else if (direction == 'u' && !jump)
+        {
+            boss.x = rect.x;
+            boss.y = rect.y - rect.h;
+            boss.w = rect.w;
+            boss.h = rect.h;
+        }
+        else if (direction == 'd' && !jump)
+        {
+            boss.x = rect.x;
+            boss.y = rect.y + rect.h;
+            boss.w = rect.w;
+            boss.h = rect.h;
+        }
+        return !inside(bossh.rx, bossh.ry, boss);
+    }
+    bool hitheart(bossheart bossh,bool isfacingright, bool isfacingleft, bool isfacingup,bool isfacingdown)
+    {
+        SDL_Rect sr;
+        sr.w = 62;
+        sr.h = 67;
+        if (isfacingright)
+        {
+            sr.x = rect.x + 64;
+            sr.y = rect.y;
+        }
+        else if (isfacingleft)
+        {
+            sr.x = rect.x - 64;
+            sr.y = rect.y;
+        }
+        else if (isfacingdown)
+        {
+            sr.x = rect.x;
+            sr.y = rect.y + 70;
+        }
+        else if (isfacingup)
+        {
+            sr.x = rect.x;
+            sr.y = rect.y - 70;
+        }
+        if (inside(bossh.rx, bossh.ry, sr))
+        {
+            bossh.generatebossheartlocation();
+            return 1;
+
+        }
+        return 0;
+     
     }
 };
 
