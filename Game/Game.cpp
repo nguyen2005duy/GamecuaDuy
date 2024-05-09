@@ -200,9 +200,13 @@ int main(int argc, char* argv[])
     SDL_Color bossdialcolour = { 218,50,4,255 };
 
     SDL_Texture* gameover = graphics.renderText("Game Over", gameoverfont, colorhover);
+    SDL_Texture* youwon = graphics.renderText("YOU WON!!!", gameoverfont, colorhover);
     SDL_Texture* gamename = graphics.renderText("Mystic Dungeon", gameoverfont, colorhover);
     SDL_Texture* menu = graphics.renderText("Menu", menufont, color);
     SDL_Texture* PAUSE = graphics.renderText("Pause", menufont, color);
+    SDL_Texture* menuwon = graphics.renderText("Menu", uifont, colorhover);
+    SDL_Texture* menuwonhover = graphics.renderText("Menu", uifont, colorhovere);
+    ui menuwonui;
     SDL_Texture* start = graphics.renderText("Start", uifont, color);
     SDL_Texture* starthovered = graphics.renderText("Start", uifont, colorhover);
     ui startui;
@@ -264,7 +268,7 @@ int main(int argc, char* argv[])
     ms.locy = 300;
     bossh.generatebossheartlocation();
     SDL_Texture* bossheartt = loadTexture("img\\bossheart.png",graphics.renderer);
-
+    boss.heartamount = 10;
     while (!quit && !gameOver(cha)) {
         SDL_GetMouseState(&x, &y);
         //  cerr << x << "," << y;
@@ -341,6 +345,12 @@ int main(int argc, char* argv[])
                     firestate = 0;
                     SDL_DestroyTexture(background);
                     background = loadTexture("img//gameover.png", graphics.renderer);
+                    break;
+                case 4:
+                    changedmap = 0;
+                    currentmap = 4;
+                    SDL_DestroyTexture(background);
+                    background = loadTexture("img//aboutthegame.png", graphics.renderer);
                     break;
                 }
             }
@@ -4160,7 +4170,8 @@ int main(int argc, char* argv[])
             }
             if (inside(ms.locx, ms.locy, cha.getrect()))
             {
-                pause = true;
+                changedmap = 1;
+                currentmap = 4;
             }
             break;
             case 3:
@@ -4199,7 +4210,40 @@ int main(int argc, char* argv[])
                 }
                 graphics.presentScene();
             break;
-         
+            case 4:
+                graphics.prepareScene(background);
+                graphics.renderTexture(youwon, 205, 101);
+                SDL_GetMouseState(&x, &y);
+                if ((x <= 749 && x >= 649) && (y <= 567 && y >= 529))
+                {
+                    menuwonui.hovered = true;
+                }
+                else
+                {
+                    menuwonui.hovered = false;
+                }
+
+                if(!menuwonui.hovered)
+                {
+                    graphics.renderTexture(menuwon, 671, 537);
+                }
+                else {
+                    graphics.renderTexture(menuwonhover, 671, 537);
+                }
+                switch (event.type)
+                {
+                case SDL_MOUSEBUTTONDOWN: 
+                    if ((x <= 749 && x >= 649) && (y <= 567 && y >= 529))
+                    {
+                        changedmap = 1;
+                        currentmap = -3;
+                    }
+                    break;
+                case SDL_MOUSEBUTTONUP:
+                    break;
+                }
+                graphics.presentScene();
+                break;
         }
 
         

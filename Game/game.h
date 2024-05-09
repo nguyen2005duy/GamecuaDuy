@@ -490,7 +490,7 @@ struct Cha {
         }
         return !inside(bossh.rx, bossh.ry, boss);
     }
-    bool hitheart(bossheart bossh,bool isfacingright, bool isfacingleft, bool isfacingup,bool isfacingdown)
+    bool hitheart(bossheart &bossh,bool isfacingright, bool isfacingleft, bool isfacingup,bool isfacingdown)
     {
         SDL_Rect sr;
         sr.w = 62;
