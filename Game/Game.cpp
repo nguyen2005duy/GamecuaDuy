@@ -241,7 +241,6 @@ int main(int argc, char* argv[])
     SDL_Texture* backhovered = graphics.renderText("Back", uifont, colorhovere);
     SDL_Texture* next = graphics.renderText("Next", uifont, colorhover);
     SDL_Texture* nexthover = graphics.renderText("Next", uifont, colorhovere);
-
     SDL_Texture* madeby = graphics.renderText("This game was made and owned by Nguyen Duc Duy", uifont, colorhovere);
     SDL_Texture* goal = graphics.renderText("Your goal is to reach to the end of the dungeon ", uifont, colorhovere);
     SDL_Texture* goalnext = graphics.renderText("and obtain the master sword", uifont, colorhovere);
@@ -312,6 +311,9 @@ int main(int argc, char* argv[])
                     isfacingleft = 0;
                     fireballstate = 0;
                     firestate = 0;
+                    dial.first =1;
+                    dial.second = 1;
+                    dial.third = 1;
                     SDL_DestroyTexture(background);
                     background = loadTexture("img//map1.png", graphics.renderer);
                     break;
@@ -322,7 +324,15 @@ int main(int argc, char* argv[])
                     key.showing = 0;
                     break;
                 case 2:
+                    boss.heartamount = 10;
+                    fireballstate = 0;
+                    firestate = 0;
+                    bossh.generatebossheartlocation();
+                    ms.obtained = 0;
+                    ms.showing = 0;
                     changedmap = 0;
+                    boss.isalive = 1;
+                    boss.died = 0;
                     key.obtained = 0;
                     SDL_DestroyTexture(background);
                     cha.newmap();
@@ -4137,7 +4147,7 @@ int main(int argc, char* argv[])
             }
             if (boss.heartamount <= 0 && boss.isalive)
             {
-                for (int i = 1;i <= 5;i++)
+                for (int i = 1;i <= 6;i++)
                 {
                     graphics.prepareScene(background);
                     switch (i)
