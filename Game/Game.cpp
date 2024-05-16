@@ -186,7 +186,9 @@ int main(int argc, char* argv[])
     int flimit = rand() % FIRELIMIT + 1;
     Mix_Music* nc = graphics.loadMusic("audio\\nightdancer.mp3");
     Mix_Music* rn = graphics.loadMusic("audio\\renai.mp3");
-    graphics.play(nc);
+    Mix_Music* menumusic = graphics.loadMusic("audio\\menu.mp3");
+    Mix_Music* gamemusic = graphics.loadMusic("audio\\game.mp3");
+    Mix_Music* deathmusic = graphics.loadMusic("audio\\death.mp3");
     TTF_Font* menufont = graphics.loadFont("font\\menu.ttf", 30);
     TTF_Font* uifont = graphics.loadFont("font\\ui.ttf", 20);
     TTF_Font* pausefont = graphics.loadFont("font\\ui.ttf", 25);
@@ -272,14 +274,15 @@ int main(int argc, char* argv[])
         SDL_GetMouseState(&x, &y);
         //  cerr << x << "," << y;
       //  graphics.prepareScene(background);
-
+        graphics.play(menumusic);
         while (SDL_PollEvent(&event)) {
             if (changedmap)
             {
                 switch (currentmap)
                 {
                 case -3:
-
+                    Mix_HaltMusic();
+                    graphics.play(menumusic);
                     changedmap = 0;
                     SDL_DestroyTexture(background);
                     background = loadTexture("img//menu.png", graphics.renderer);
@@ -296,7 +299,8 @@ int main(int argc, char* argv[])
                     background = loadTexture("img//controls.png", graphics.renderer);
                     break;
                 case 0:
-                   
+                    Mix_HaltMusic();
+                    graphics.play(gamemusic);
                     changedmap = 0;
                     cha.reset();
                     slime1.reset();
@@ -339,6 +343,8 @@ int main(int argc, char* argv[])
                     background = loadTexture("img//map2butbetter.png", graphics.renderer);
                     break;
                 case 3:
+                    Mix_HaltMusic();
+                    graphics.play(deathmusic);
                     changedmap = 0;
                     cha.reset();
                     slime1.reset();
