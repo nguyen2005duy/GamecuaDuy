@@ -58,5 +58,6 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="shooter.txt" />
+    <Text Include="highscore.txt" />
   </ItemGroup>
 </Project>

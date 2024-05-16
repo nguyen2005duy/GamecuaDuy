@@ -12,8 +12,10 @@
 #include <ctime>   // For time()
 #include "chaanimation.h"
 #include <SDL_ttf.h>
+#include <string>
 #define FIRELIMIT 30
 #define FIREBALLLIMIT 4
+#include <fstream>
 using namespace std;
 
 void logErrorAndExit(const char* msg, const char* error)
@@ -87,6 +89,7 @@ int main(int argc, char* argv[])
     SDL_Texture* warning = loadTexture("img\\Warning.png", graphics.renderer);
     SDL_Texture* warninglane = loadTexture("img\\warninglane.png", graphics.renderer);
     SDL_Texture* chadial = loadTexture("img\\characterdialogue.png", graphics.renderer);
+    bool scorednewhighscore;
     dialogue dial;
     Key key;
     int fireballoc = 0;
@@ -195,12 +198,17 @@ int main(int argc, char* argv[])
     TTF_Font* gameoverfont = graphics.loadFont("font\\gameover.otf", 90);
     TTF_Font* replayfont = graphics.loadFont("font\\gameover.otf", 60);
     TTF_Font* dialfont = graphics.loadFont("font\\charactersdialouge.otf", 20);
+    TTF_Font* highscorefont = graphics.loadFont("font\\highscore.ttf", 35);
+    TTF_Font* cgfont = graphics.loadFont("font\\highscore.ttf", 20);
+
     SDL_Color color = { 21, 21, 21, 225 };
     SDL_Color colorhover = { 226,226,226,226 };
     SDL_Color colorhovere = {255,255,255,255};
     SDL_Color chadialcolour = { 32,201,207,255 };
     SDL_Color bossdialcolour = { 218,50,4,255 };
-
+    SDL_Color yellow = { 254,246,91,255 };
+    SDL_Texture* shortesttime = graphics.renderText("Shortest time:        Steps", highscorefont,yellow);
+    SDL_Texture* cg = graphics.renderText("Congratulations!! You've just scored a new shortest time", cgfont, yellow);
     SDL_Texture* gameover = graphics.renderText("Game Over", gameoverfont, colorhover);
     SDL_Texture* youwon = graphics.renderText("YOU WON!!!", gameoverfont, colorhover);
     SDL_Texture* gamename = graphics.renderText("Mystic Dungeon", gameoverfont, colorhover);
@@ -258,6 +266,8 @@ int main(int argc, char* argv[])
     SDL_Texture* boss2 = graphics.renderText("I must say, I expected more from you.", dialfont, bossdialcolour);
     SDL_Texture* cha1 = graphics.renderText("You won't get away with this. Your reign of terror ends here.", dialfont, chadialcolour);
     SDL_Texture* bossdial = graphics.loadTexture("img\\bossdialogue.png");
+    
+    
     ui nextui;
     ui backui;
     bossheart bossh;
@@ -271,6 +281,13 @@ int main(int argc, char* argv[])
     SDL_Texture* bossheartt = loadTexture("img\\bossheart.png",graphics.renderer);
     boss.heartamount = 10;
     graphics.play(menumusic);
+   // ofstream ohighscore("highscore.txt");
+    ifstream ihighscore("highscore.txt");
+    int highscore;
+    int countstep=0;
+    ihighscore >> highscore;
+ 
+    SDL_Texture* highscoretext=graphics.renderText("placeholder",dialfont,yellow);
     while (!quit && !gameOver(cha)) {
         SDL_GetMouseState(&x, &y);
         //  cerr << x << "," << y;
@@ -316,10 +333,11 @@ int main(int argc, char* argv[])
                     isfacingleft = 0;
                     fireballstate = 0;
                     firestate = 0;
-                    dial.first =1;
+                    dial.first = 1;
                     dial.second = 1;
                     dial.third = 1;
                     SDL_DestroyTexture(background);
+                    countstep = 0;
                     background = loadTexture("img//map1.png", graphics.renderer);
                     break;
                 case 1:
@@ -369,12 +387,30 @@ int main(int argc, char* argv[])
                     currentmap = 4;
                     SDL_DestroyTexture(background);
                     background = loadTexture("img//aboutthegame.png", graphics.renderer);
+                    if (highscore <= countstep)
+                    {
+                        string hss = to_string(highscore);
+                        highscoretext = graphics.renderText(hss.c_str(), highscorefont, yellow);
+          
+                    }
+                    else
+                    {
+                        string hss = to_string(countstep);
+                        highscoretext = graphics.renderText(hss.c_str(), highscorefont, yellow);
+                        scorednewhighscore = true;
+                        ofstream ohighscore("highscore.txt");
+                        highscore = countstep;
+                        ohighscore<<countstep;
+                        ohighscore.close();
+                    }
                     break;
                 }
             }
+     
             switch(currentmap)
             {
             case -3:
+                scorednewhighscore = 0;
                 SDL_GetMouseState(&x, &y);
                 if ((x >= 155 && x <= 269) && (y >= 289 && y <= 334))
                 {
@@ -591,6 +627,7 @@ int main(int argc, char* argv[])
                 }
                 if (event.key.keysym.scancode == SDL_SCANCODE_SPACE)
                 {
+                    countstep++;
                     for (int i = 1;i <= 7;i++)
                     {
 
@@ -728,6 +765,8 @@ int main(int argc, char* argv[])
                 }
                 if (event.key.keysym.scancode == SDL_SCANCODE_Z)
                 {
+                    countstep++;
+
                     if (isfacingright)
                     {
 
@@ -1346,6 +1385,9 @@ int main(int argc, char* argv[])
                 }
                 if (event.key.keysym.scancode == SDL_SCANCODE_X)
                 {
+
+                    countstep++;
+
                     if (isfacingright)
                     {
                         if (cha.notborderjump('r'))
@@ -2065,6 +2107,8 @@ int main(int argc, char* argv[])
                 }
                 if (event.key.keysym.scancode == SDL_SCANCODE_UP)
                 {
+                    countstep++;
+
                     if (cha.notborder('u'))
                     {
                         idling = 0;
@@ -2196,6 +2240,8 @@ int main(int argc, char* argv[])
                 if (event.key.keysym.scancode == SDL_SCANCODE_LEFT)
 
                 {
+                    countstep++;
+
                     if (cha.notborder('l'))
                     {
                         idling = 0;
@@ -2334,6 +2380,8 @@ int main(int argc, char* argv[])
 
                 if (event.key.keysym.scancode == SDL_SCANCODE_RIGHT)
                 {
+                    countstep++;
+
                     if (cha.notborder('r'))
                     {
                         bool collided = false;
@@ -2471,6 +2519,8 @@ int main(int argc, char* argv[])
                 }
                 if (event.key.keysym.scancode == SDL_SCANCODE_DOWN)
                 {
+                    countstep++;
+
                     if (cha.notborder('d'))
                     {
                         idling = 0;
@@ -3074,6 +3124,7 @@ int main(int argc, char* argv[])
                     }
                     if (event.key.keysym.scancode == SDL_SCANCODE_SPACE)
                     {
+                        countstep++;
 
                         for (int i = 1;i <= 7;i++)
                         {
@@ -3163,6 +3214,7 @@ int main(int argc, char* argv[])
                     }
                     if (event.key.keysym.scancode == SDL_SCANCODE_Z)
                     {
+                        countstep++;
 
                         if (isfacingright)
                         {
@@ -3396,6 +3448,8 @@ int main(int argc, char* argv[])
                     }
                     if (event.key.keysym.scancode == SDL_SCANCODE_X)
                     {
+                        countstep++;
+
                         if (isfacingright)
                         {
                             if (cha.notborderjump('r')&&cha.notbossloc(1,'r',ms.showing) && cha.notheartloc(1, 'r',bossh))
@@ -3680,6 +3734,8 @@ int main(int argc, char* argv[])
                     }
                     if (event.key.keysym.scancode == SDL_SCANCODE_UP)
                     {
+                        countstep++;
+
                         if (cha.notborder('u') && cha.notbossloc( 0,'u',ms.showing) && cha.notheartloc(0, 'u', bossh))
                         {
                             idling = 0;
@@ -3763,6 +3819,8 @@ int main(int argc, char* argv[])
                     }
                     if (event.key.keysym.scancode == SDL_SCANCODE_LEFT)
                     {
+                        countstep++;
+
                         if (cha.notborder('l') && cha.notbossloc(0,'l',ms.showing) && cha.notheartloc(0, 'l', bossh))
                         {
                             idling = 0;
@@ -3848,6 +3906,8 @@ int main(int argc, char* argv[])
                     }
                     if (event.key.keysym.scancode == SDL_SCANCODE_RIGHT)
                     {
+                        countstep++;
+
                         if (cha.notborder('r') && cha.notbossloc(0,'r',ms.showing) && cha.notheartloc(0, 'r', bossh))
                         {
                             bool collided = false;
@@ -3932,6 +3992,8 @@ int main(int argc, char* argv[])
                     }
                     if (event.key.keysym.scancode == SDL_SCANCODE_DOWN)
                     {
+                        countstep++;
+
                         if (cha.notborder('d') && cha.notbossloc(0,'d',ms.showing) && cha.notheartloc(0, 'd', bossh))
                         {
                             idling = 0;
@@ -4252,6 +4314,12 @@ int main(int argc, char* argv[])
             case 4:
                 graphics.prepareScene(background);
                 graphics.renderTexture(youwon, 205, 101);
+                graphics.renderTexture(shortesttime, 162, 276);
+                graphics.renderTexture(highscoretext, 472, 276);
+                if (scorednewhighscore)
+                {
+                    graphics.renderTexture(cg, 57, 356);
+                }
                 SDL_GetMouseState(&x, &y);
                 if ((x <= 749 && x >= 649) && (y <= 567 && y >= 529))
                 {
@@ -4279,6 +4347,7 @@ int main(int argc, char* argv[])
                     }
                     break;
                 case SDL_MOUSEBUTTONUP:
+                    cout << x << y << endl;
                     break;
                 }
                 graphics.presentScene();
