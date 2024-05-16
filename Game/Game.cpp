@@ -270,11 +270,12 @@ int main(int argc, char* argv[])
     bossh.generatebossheartlocation();
     SDL_Texture* bossheartt = loadTexture("img\\bossheart.png",graphics.renderer);
     boss.heartamount = 10;
+    graphics.play(menumusic);
     while (!quit && !gameOver(cha)) {
         SDL_GetMouseState(&x, &y);
         //  cerr << x << "," << y;
       //  graphics.prepareScene(background);
-        graphics.play(menumusic);
+  
         while (SDL_PollEvent(&event)) {
             if (changedmap)
             {
@@ -363,6 +364,7 @@ int main(int argc, char* argv[])
                     background = loadTexture("img//gameover.png", graphics.renderer);
                     break;
                 case 4:
+                    graphics.play(deathmusic);
                     changedmap = 0;
                     currentmap = 4;
                     SDL_DestroyTexture(background);
@@ -543,8 +545,19 @@ int main(int argc, char* argv[])
                 break;
             case 0:
             case 1:
+
         {
         //start of map1 and zero
+                if (!muted)
+                {
+                  
+                    Mix_ResumeMusic();
+                }
+                else
+                {
+                   
+                    Mix_PauseMusic();
+                }
                 while (dial.first)
                 {
                     graphics.prepareScene(background);
@@ -557,7 +570,7 @@ int main(int argc, char* argv[])
                     graphics.presentScene();
                     waitUntilKeyPressed();
                     dial.first = 0;
-            }
+                }
             switch (event.type) {
             case SDL_QUIT:
                 exit(0);
@@ -2950,6 +2963,16 @@ int main(int argc, char* argv[])
         }
         //start of map2
         case 2:
+            if (!muted)
+            {
+
+                Mix_ResumeMusic();
+            }
+            else
+            {
+
+                Mix_PauseMusic();
+            }
             while (dial.third)
             {
                 graphics.prepareScene(background);
